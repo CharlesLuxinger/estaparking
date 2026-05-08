@@ -1,0 +1,38 @@
+{
+  "C:\\Users\\charl\\Projetos\\estaparking\\build.gradle.kts": {
+    "mtime": 1778213772.515274,
+    "hash": "310e53aa0bf7c13e48efdad6c24eb4b0"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\gradlew": {
+    "mtime": 1778213681.1715834,
+    "hash": "780b1d3e23a3b82154795f73df943a14"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\settings.gradle.kts": {
+    "mtime": 1778211195.9380252,
+    "hash": "1f8a8a130289c2cd440d958832b54109"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\Application.kt": {
+    "mtime": 1778210689.5606427,
+    "hash": "317a515f74f184d6d5d1472a7076927d"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\test\\kotlin\\com\\charlesluxinger\\estaparking\\ApplicationTests.kt": {
+    "mtime": 1778210689.6019294,
+    "hash": "29ef09cd70d532e6b3e7d2642c09948e"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\AGENTS.md": {
+    "mtime": 1778215353.8840485,
+    "hash": "2a26c9ac7b2ac46fe14ce6719b60ab0d"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\README.md": {
+    "mtime": 1778214359.508378,
+    "hash": "9ff96fc76daa0d75a673949c26096f1e"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\config\\detekt\\detekt.yml": {
+    "mtime": 1778213009.4326026,
+    "hash": "af3466f2ecbbe35845a6b06b74e8499a"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\resources\\application.yaml": {
+    "mtime": 1778210689.570952,
+    "hash": "1fff8be15e137e036458f20694948d02"
+  }
+}

@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
   checks: write
 
@@ -43,6 +43,22 @@ jobs:
 
       - name: Run tests with coverage
         run: ./gradlew --no-daemon test jacocoTestReport
+
+      - name: Generate coverage badges
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: cicirello/jacoco-badge-generator@v2
+        with:
+          jacoco-csv-file: build/reports/jacoco/test/jacocoTestReport.csv
+          badges-directory: badges
+          generate-branches-badge: true
+          generate-coverage-badge: true
+
+      - name: Commit and push badges
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'ci: update jacoco coverage badges [skip ci]'
+          file_pattern: badges/*.svg
 
       - name: Add coverage to PR summary
         if: always()
