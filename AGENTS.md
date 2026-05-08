@@ -13,17 +13,62 @@ Spring Boot 3.5 / Kotlin 2.3 / Java 25 REST API. Target architecture: Hexagonal 
 
 | Layer | Package | Rule |
 |-------|---------|------|
-| Domain | `domain/` | Zero Spring annotations. No `@Service`, `@Component`, `@Transactional`. Exception: `domain/config/` |
-| Infrastructure | `infra/` | Implements outbound ports. Depends on domain — never the other way |
-| Controllers | `infra/client/<feature>/` | Named `<Feature>ControllerV1`. Increment suffix on breaking changes |
-| Inbound ports | `domain/port/inbound/` | Interfaces: `<Feature>QueryPort`, `<Feature>CommandPort` |
-| Outbound ports | `domain/port/outbound/` | Interfaces: `<Feature>RepositoryPort`, `<Feature>ClientPort` |
-| Adapters | `infra/` | Named `<Feature><Tech>Adapter` (e.g. `ParkingQueryPortJPAAdapter`). **Never** `*PortImpl` |
-| Use case impls | `domain/application/service/<feature>/` | Named `<UseCase>Impl` |
-| Commands/Queries | `domain/port/inbound/<feature>/model/` | Named `<Action><Domain>Command` / `<Action><Domain>Query` |
-| DTOs / view models | `domain/port/inbound/<feature>/model/` | **Never** inline in service files |
+| Domain | `domain/` | Core business logic (entities, value objects, domain services). Zero Spring annotations. |
+| Application | `application/` | Use case implementations (`UseCaseImpl`). Orchestrates domain logic. No framework dependencies. |
+| Infrastructure | `infra/` | Framework adapters (persistence, external clients, web controllers). Depends on application. |
 
-**Dependency direction:** `infra/` → `domain/`. Violations are build failures (detekt enforces this).
+### Governance Rules
+
+1. **Strict Dependency Direction:** `infra/` → `application/` → `domain/`.
+2. **Controller Boundary:** Web controllers (`infra/client/`) must invoke inbound ports or use cases only. Direct access to repositories or infrastructure adapters is strictly forbidden.
+3. **Use Case Ownership:** Use case implementations belong to the application layer. They coordinate domain objects but do not contain core business rules (which belong in the domain).
+
+### Architecture Governance Checks
+
+Use these commands to verify architectural integrity. A match (output) usually indicates a violation unless specified.
+
+1. **Strict Dependency Rule:** Domain must NOT import Application or Infra.
+   - **Bash (CI/Linux only):**
+     ```bash
+     grep -r "import.*\.application\|\.infra" src/main/kotlin/com/charlesluxinger/estaparking/domain
+     ```
+   - **PowerShell (Windows/local authoritative):**
+     ```powershell
+     if (Test-Path "src/main/kotlin/com/charlesluxinger/estaparking/domain") { Get-ChildItem -Path "src/main/kotlin/com/charlesluxinger/estaparking/domain" -Recurse -Filter "*.kt" | Select-String -Pattern "import.*\.application", "import.*\.infra" }
+     ```
+
+2. **Controller Boundary:** Controllers must NOT import repositories or adapters.
+   - **Bash (CI/Linux only):**
+     ```bash
+     grep -r "import.*\.repository\|\.adapter" src/main/kotlin/com/charlesluxinger/estaparking/infra/client
+     ```
+   - **PowerShell (Windows/local authoritative):**
+     ```powershell
+     if (Test-Path "src/main/kotlin/com/charlesluxinger/estaparking/infra/client") { Get-ChildItem -Path "src/main/kotlin/com/charlesluxinger/estaparking/infra/client" -Recurse -Filter "*.kt" | Select-String -Pattern "import.*\.repository", "import.*\.adapter" }
+     ```
+
+3. **Use-Case Ownership:** Use cases must be in the application layer.
+   - **Bash (CI/Linux only):**
+     ```bash
+     # Check if UseCaseImpl exists outside application/service
+     find src/main/kotlin -name "*UseCaseImpl.kt" | grep -v "application/service"
+     ```
+   - **PowerShell (Windows/local authoritative):**
+     ```powershell
+     Get-ChildItem -Path "src/main/kotlin" -Recurse -Filter "*UseCaseImpl.kt" | Where-Object { $_.FullName -notmatch "application\\service" }
+     ```
+
+### Package Details
+
+| Component | Package | Rule |
+|-----------|---------|------|
+| Controllers | `infra/client/<feature>/` | Named `<Feature>ControllerV1`. Only calls application ports. |
+| Inbound ports | `domain/port/inbound/` | Interfaces: `<Feature>QueryPort`, `<Feature>CommandPort`. |
+| Outbound ports | `domain/port/outbound/` | Interfaces: `<Feature>RepositoryPort`, `<Feature>ClientPort`. |
+| Adapters | `infra/` | Named `<Feature><Tech>Adapter` (e.g. `ParkingQueryPortJPAAdapter`). **Never** `*PortImpl`. |
+| Use case impls | `application/service/<feature>/` | Named `<UseCase>Impl`. Framework-agnostic orchestration. |
+| Commands/Queries | `domain/port/inbound/<feature>/model/` | Named `<Action><Domain>Command` / `<Action><Domain>Query`. |
+| DTOs / view models | `domain/port/inbound/<feature>/model/` | **Never** inline in service files. |
 
 ## NAMING
 
