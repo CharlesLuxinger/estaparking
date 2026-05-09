@@ -18,22 +18,21 @@ class SpotTest {
         val original = createAvailableSpot()
         val sameValues = createAvailableSpot()
         val different = original.copy(status = SpotStatus.ENTRY_REGISTERED, occupiedBy = Vehicle(plate = "ABC1234"))
-        val (id, sector, coordinates, status, occupiedBy) = original
 
         assertEquals(original, sameValues)
         assertEquals(original.hashCode(), sameValues.hashCode())
         assertNotEquals(original, different)
-        assertEquals("spot-1", id)
-        assertEquals("A", sector)
+        assertEquals("spot-1", original.id)
+        assertEquals("A", original.sector)
         assertEquals(
             Coordinates(
                 latitude = BigDecimal("-23.55052"),
                 longitude = BigDecimal("-46.633308"),
             ),
-            coordinates,
+            original.coordinates,
         )
-        assertEquals(SpotStatus.AVAILABLE, status)
-        assertEquals(null, occupiedBy)
+        assertEquals(SpotStatus.AVAILABLE, original.status)
+        assertEquals(null, original.occupiedBy)
         assertEquals(
             Coordinates(
                 latitude = BigDecimal("-23.55052"),
