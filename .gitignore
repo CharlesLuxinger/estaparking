@@ -42,3 +42,7 @@ out/
 ### Opencode ###
 .opencode
 .sisyphus/
+
+# Added by code-review-graph
+graphify-out/cache/
+.code-review-graph/

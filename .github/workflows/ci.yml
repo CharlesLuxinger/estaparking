@@ -25,11 +25,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 25
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '25'
+          java-version: '21'
           cache: gradle
 
       - name: Make Gradle wrapper executable
@@ -45,20 +45,22 @@ jobs:
         run: ./gradlew --no-daemon test jacocoTestReport
 
       - name: Generate coverage badges
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'pull_request'
         uses: cicirello/jacoco-badge-generator@v2
         with:
           jacoco-csv-file: build/reports/jacoco/test/jacocoTestReport.csv
           badges-directory: badges
           generate-branches-badge: true
           generate-coverage-badge: true
+          on-missing-report: fail
 
       - name: Commit and push badges
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'pull_request'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'ci: update jacoco coverage badges [skip ci]'
           file_pattern: badges/*.svg
+          branch: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
 
       - name: Add coverage to PR summary
         if: always()
@@ -75,4 +77,4 @@ jobs:
         with:
           name: jacoco-report
           path: build/reports/jacoco/test/html/
-          retention-days: 7
+          retention-days: 1
