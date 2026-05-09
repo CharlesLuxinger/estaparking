@@ -6,12 +6,44 @@ import com.charlesluxinger.estaparking.domain.error.ParkingDomainError
 import com.charlesluxinger.estaparking.domain.event.EventType
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
 class SpotTest {
+    @Test
+    fun `data class generated methods are exercised`() {
+        val original = createAvailableSpot()
+        val sameValues = createAvailableSpot()
+        val different = original.copy(status = SpotStatus.ENTRY_REGISTERED, occupiedBy = Vehicle(plate = "ABC1234"))
+        val (id, sector, coordinates, status, occupiedBy) = original
+
+        assertEquals(original, sameValues)
+        assertEquals(original.hashCode(), sameValues.hashCode())
+        assertNotEquals(original, different)
+        assertEquals("spot-1", id)
+        assertEquals("A", sector)
+        assertEquals(
+            Coordinates(
+                latitude = BigDecimal("-23.55052"),
+                longitude = BigDecimal("-46.633308"),
+            ),
+            coordinates,
+        )
+        assertEquals(SpotStatus.AVAILABLE, status)
+        assertEquals(null, occupiedBy)
+        assertEquals(
+            Coordinates(
+                latitude = BigDecimal("-23.55052"),
+                longitude = BigDecimal("-46.633308"),
+            ),
+            original.coordinates,
+        )
+        assertTrue(original.toString().contains("Spot(id=spot-1, sector=A"))
+    }
+
     @Test
     fun `constructor with valid id and sector succeeds`() {
         val spot = createAvailableSpot()
