@@ -1,11 +1,11 @@
 spring:
   application:
-    name: estaparking
+    name: estaparking-test
   datasource:
     url: jdbc:mysql://localhost:3306/estaparking?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: root
+    password: test
   jpa:
     hibernate:
       ddl-auto: validate

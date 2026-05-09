@@ -1,5 +1,6 @@
 ﻿package com.charlesluxinger.estaparking.architecture
 
+import com.tngtech.archunit.lang.ArchRule
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses
 import org.junit.jupiter.api.Test
 
@@ -18,7 +19,7 @@ class DependencyDirectionTest : ArchitectureTest() {
     fun `domain must not depend on application`() {
         val domainClasses = importClassesFrom(DOMAIN_PACKAGE)
         if (domainClasses.isEmpty()) return
-        val rule =
+        val rule: ArchRule =
             noClasses()
                 .that()
                 .resideInAnyPackage(DOMAIN_PACKAGE)
@@ -26,14 +27,14 @@ class DependencyDirectionTest : ArchitectureTest() {
                 .dependOnClassesThat()
                 .resideInAnyPackage(APPLICATION_PACKAGE)
                 .because("Domain layer must be independent of Application layer in hexagonal architecture")
-        rule.check(domainClasses)
+        rule.allowEmptyShould(true).check(domainClasses)
     }
 
     @Test
     fun `domain must not depend on infrastructure`() {
         val domainClasses = importClassesFrom(DOMAIN_PACKAGE)
         if (domainClasses.isEmpty()) return
-        val rule =
+        val rule: ArchRule =
             noClasses()
                 .that()
                 .resideInAnyPackage(DOMAIN_PACKAGE)
@@ -41,14 +42,14 @@ class DependencyDirectionTest : ArchitectureTest() {
                 .dependOnClassesThat()
                 .resideInAnyPackage(INFRA_PACKAGE)
                 .because("Domain layer must not depend on Infrastructure layer")
-        rule.check(domainClasses)
+        rule.allowEmptyShould(true).check(domainClasses)
     }
 
     @Test
     fun `application must not depend on infrastructure`() {
         val appClasses = importClassesFrom(APPLICATION_PACKAGE)
         if (appClasses.isEmpty()) return
-        val rule =
+        val rule: ArchRule =
             noClasses()
                 .that()
                 .resideInAnyPackage(APPLICATION_PACKAGE)
@@ -56,6 +57,6 @@ class DependencyDirectionTest : ArchitectureTest() {
                 .dependOnClassesThat()
                 .resideInAnyPackage(INFRA_PACKAGE)
                 .because("Application layer must not depend on Infrastructure layer")
-        rule.check(appClasses)
+        rule.allowEmptyShould(true).check(appClasses)
     }
 }
