@@ -19,16 +19,16 @@ Implement billing completion at EXIT and publish domain/application events for r
 3. REFACTOR: split billing and event concerns cleanly.
 
 ## Implementation Checklist
-- [ ] Define event publishing outbound port.
-- [ ] Implement adapter (log-based or broker-stub per challenge scope).
-- [ ] Persist billing result on EXIT.
-- [ ] Add duplicate EXIT/idempotency behavior tests.
+- [X] Define event publishing outbound port.
+- [X] Implement adapter (log-based or broker-stub per challenge scope).
+- [X] Persist billing result on EXIT.
+- [X] Add duplicate EXIT/idempotency behavior tests.
 
 ## Acceptance Criteria
-- [ ] EXIT creates exactly one billing record.
-- [ ] Billing uses pricing snapshot derived at ENTRY policy.
-- [ ] Event publication occurs once per accepted lifecycle transition.
-- [ ] Duplicate EXIT does not double-charge.
+- [X] EXIT creates exactly one billing record.
+- [X] Billing uses pricing snapshot derived at ENTRY policy.
+- [X] Event publication occurs once per accepted lifecycle transition.
+- [X] Duplicate EXIT does not double-charge.
 
 ## QA Scenarios
 Scenario: normal EXIT billing
