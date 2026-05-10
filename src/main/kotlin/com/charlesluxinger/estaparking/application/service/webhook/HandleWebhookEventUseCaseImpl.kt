@@ -31,10 +31,10 @@ class HandleWebhookEventUseCaseImpl(
     private val parkingEventRepositoryPort: ParkingEventRepositoryPort,
     private val entryCommandPort: EntryCommandPort,
     private val parkedCommandPort: ParkedCommandPort,
-    private val billingRepositoryPort: BillingRepositoryPort? = null,
-    private val pricingSnapshotRepositoryPort: PricingSnapshotRepositoryPort? = null,
-    private val billingRecordRepositoryPort: BillingRecordRepositoryPort? = null,
-    private val lifecycleEventPublisherPort: LifecycleEventPublisherPort? = null,
+    private val billingRepositoryPort: BillingRepositoryPort,
+    private val pricingSnapshotRepositoryPort: PricingSnapshotRepositoryPort,
+    private val billingRecordRepositoryPort: BillingRecordRepositoryPort,
+    private val lifecycleEventPublisherPort: LifecycleEventPublisherPort,
     private val clock: Clock = Clock.systemUTC(),
 ) : WebhookEventCommandPort {
     companion object {
@@ -92,7 +92,7 @@ class HandleWebhookEventUseCaseImpl(
             EventType.PARKED -> Unit
         }
 
-        lifecycleEventPublisherPort?.publish(
+        lifecycleEventPublisherPort.publish(
             PublishedLifecycleEvent(
                 parkingId = command.parkingId,
                 licensePlate = command.licensePlate,
@@ -110,10 +110,10 @@ class HandleWebhookEventUseCaseImpl(
         occurredAt: Instant,
     ) {
         val assignedSpot = updatedParking.spots.firstOrNull { it.occupiedBy?.plate == command.licensePlate } ?: return
-        val garage = billingRepositoryPort?.findGarageBySector(assignedSpot.sector) ?: return
+        val garage = billingRepositoryPort.findGarageBySector(assignedSpot.sector) ?: return
         val occupancy = updatedParking.occupancyPercentage()
 
-        pricingSnapshotRepositoryPort?.save(
+        pricingSnapshotRepositoryPort.save(
             PricingSnapshot(
                 parkingId = command.parkingId,
                 licensePlate = command.licensePlate,
@@ -131,7 +131,7 @@ class HandleWebhookEventUseCaseImpl(
         occurredAt: Instant,
     ) {
         val snapshot =
-            pricingSnapshotRepositoryPort?.findLatestByParkingIdAndLicensePlate(
+            pricingSnapshotRepositoryPort.findLatestByParkingIdAndLicensePlate(
                 parkingId = command.parkingId,
                 licensePlate = command.licensePlate,
             ) ?: return
@@ -151,7 +151,7 @@ class HandleWebhookEventUseCaseImpl(
                 .multiply(snapshot.multiplierAtEntry)
                 .setScale(2, RoundingMode.HALF_UP)
 
-        billingRecordRepositoryPort?.save(
+        billingRecordRepositoryPort.save(
             BillingRecord(
                 parkingId = command.parkingId,
                 licensePlate = command.licensePlate,
