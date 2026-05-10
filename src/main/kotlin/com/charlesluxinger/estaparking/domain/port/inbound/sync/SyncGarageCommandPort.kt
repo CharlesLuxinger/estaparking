@@ -1,7 +1,7 @@
 package com.charlesluxinger.estaparking.domain.port.inbound.sync
 
-import com.charlesluxinger.estaparking.domain.error.DomainResult
 import com.charlesluxinger.estaparking.domain.port.outbound.SimulatorGarageClientError
+import com.charlesluxinger.estaparking.domain.result.DomainResult
 
 interface SyncGarageCommandPort {
     fun sync(): DomainResult<SyncGarageSummary, SyncGarageError>

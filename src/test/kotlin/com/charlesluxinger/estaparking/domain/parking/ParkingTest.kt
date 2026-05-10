@@ -1,8 +1,9 @@
 package com.charlesluxinger.estaparking.domain.parking
 
-import com.charlesluxinger.estaparking.domain.error.DomainResult
 import com.charlesluxinger.estaparking.domain.error.ParkingDomainError
 import com.charlesluxinger.estaparking.domain.event.EventType
+import com.charlesluxinger.estaparking.domain.result.DomainResult.Error
+import com.charlesluxinger.estaparking.domain.result.DomainResult.Success
 import com.charlesluxinger.estaparking.domain.spot.Coordinates
 import com.charlesluxinger.estaparking.domain.spot.Spot
 import com.charlesluxinger.estaparking.domain.spot.SpotStatus
@@ -50,20 +51,20 @@ class ParkingTest {
         val parking = createParkingWithAvailableSpots()
 
         val afterEntry = parking.apply(EventType.ENTRY, vehicle)
-        assertTrue(afterEntry is DomainResult.Success)
-        val entryParking = (afterEntry as DomainResult.Success).value
+        assertTrue(afterEntry is Success)
+        val entryParking = (afterEntry as Success).value
         assertEquals(SpotStatus.ENTRY_REGISTERED, entryParking.spots[0].status)
         assertEquals(vehicle, entryParking.spots[0].occupiedBy)
 
         val afterParked = entryParking.apply(EventType.PARKED, vehicle)
-        assertTrue(afterParked is DomainResult.Success)
-        val parkedParking = (afterParked as DomainResult.Success).value
+        assertTrue(afterParked is Success)
+        val parkedParking = (afterParked as Success).value
         assertEquals(SpotStatus.PARKED, parkedParking.spots[0].status)
         assertEquals(vehicle, parkedParking.spots[0].occupiedBy)
 
         val afterExit = parkedParking.apply(EventType.EXIT, vehicle)
-        assertTrue(afterExit is DomainResult.Success)
-        val exitedParking = (afterExit as DomainResult.Success).value
+        assertTrue(afterExit is Success)
+        val exitedParking = (afterExit as Success).value
         assertEquals(SpotStatus.AVAILABLE, exitedParking.spots[0].status)
         assertEquals(null, exitedParking.spots[0].occupiedBy)
     }
@@ -80,8 +81,8 @@ class ParkingTest {
 
         val result = parking.apply(EventType.ENTRY, Vehicle(plate = "ABC1234"))
 
-        assertTrue(result is DomainResult.Error)
-        assertEquals(ParkingDomainError.FullOccupancyEntryDenied, (result as DomainResult.Error).error)
+        assertTrue(result is Error)
+        assertEquals(ParkingDomainError.FullOccupancyEntryDenied, (result as Error).error)
     }
 
     @Test
@@ -89,13 +90,13 @@ class ParkingTest {
         val parking = createParkingWithAvailableSpots()
         val result = parking.apply(EventType.EXIT, Vehicle(plate = "ABC1234"))
 
-        assertTrue(result is DomainResult.Error)
+        assertTrue(result is Error)
         assertEquals(
             ParkingDomainError.ExitBeforeEntry(
                 spotId = -1L,
                 currentStatus = SpotStatus.AVAILABLE,
             ),
-            (result as DomainResult.Error).error,
+            (result as Error).error,
         )
     }
 
@@ -104,13 +105,13 @@ class ParkingTest {
         val parking = createParkingWithAvailableSpots()
         val result = parking.apply(EventType.PARKED, Vehicle(plate = "ABC1234"))
 
-        assertTrue(result is DomainResult.Error)
+        assertTrue(result is Error)
         assertEquals(
             ParkingDomainError.InvalidParkedOrdering(
                 spotId = -1L,
                 currentStatus = SpotStatus.AVAILABLE,
             ),
-            (result as DomainResult.Error).error,
+            (result as Error).error,
         )
     }
 
@@ -119,18 +120,18 @@ class ParkingTest {
         val entryVehicle = Vehicle(plate = "ABC1234")
         val wrongVehicle = Vehicle(plate = "XYZ9876")
         val afterEntry =
-            (createParkingWithAvailableSpots().apply(EventType.ENTRY, entryVehicle) as DomainResult.Success).value
+            (createParkingWithAvailableSpots().apply(EventType.ENTRY, entryVehicle) as Success).value
 
         val result = afterEntry.apply(EventType.PARKED, wrongVehicle)
 
-        assertTrue(result is DomainResult.Error)
+        assertTrue(result is Error)
         assertEquals(
             ParkingDomainError.WrongVehicleTransitionAttempt(
                 spotId = 1L,
                 expectedPlate = entryVehicle.plate,
                 attemptedPlate = wrongVehicle.plate,
             ),
-            (result as DomainResult.Error).error,
+            (result as Error).error,
         )
     }
 
@@ -139,19 +140,19 @@ class ParkingTest {
         val entryVehicle = Vehicle(plate = "ABC1234")
         val wrongVehicle = Vehicle(plate = "XYZ9876")
         val afterEntry =
-            (createParkingWithAvailableSpots().apply(EventType.ENTRY, entryVehicle) as DomainResult.Success).value
-        val parked = (afterEntry.apply(EventType.PARKED, entryVehicle) as DomainResult.Success).value
+            (createParkingWithAvailableSpots().apply(EventType.ENTRY, entryVehicle) as Success).value
+        val parked = (afterEntry.apply(EventType.PARKED, entryVehicle) as Success).value
 
         val result = parked.apply(EventType.EXIT, wrongVehicle)
 
-        assertTrue(result is DomainResult.Error)
+        assertTrue(result is Error)
         assertEquals(
             ParkingDomainError.WrongVehicleTransitionAttempt(
                 spotId = 1L,
                 expectedPlate = entryVehicle.plate,
                 attemptedPlate = wrongVehicle.plate,
             ),
-            (result as DomainResult.Error).error,
+            (result as Error).error,
         )
     }
 
@@ -163,18 +164,18 @@ class ParkingTest {
                 createParkingWithAvailableSpots().apply(
                     EventType.ENTRY,
                     vehicle,
-                ) as DomainResult.Success
+                ) as Success
             ).value
 
         val result = afterEntry.apply(EventType.EXIT, vehicle)
 
-        assertTrue(result is DomainResult.Error)
+        assertTrue(result is Error)
         assertEquals(
             ParkingDomainError.InvalidExitOrdering(
                 spotId = 1L,
                 currentStatus = SpotStatus.ENTRY_REGISTERED,
             ),
-            (result as DomainResult.Error).error,
+            (result as Error).error,
         )
     }
 
@@ -189,14 +190,14 @@ class ParkingTest {
         val failingSpot = mockk<Spot>()
 
         every { failingSpot.canAcceptEntry() } returns true
-        every { failingSpot.transition(EventType.ENTRY, vehicle) } returns DomainResult.Error(expectedError)
+        every { failingSpot.transition(EventType.ENTRY, vehicle) } returns Error(expectedError)
 
         val parking = Parking(id = "parking-1", name = "Central", spots = listOf(failingSpot))
 
         val result = parking.apply(EventType.ENTRY, vehicle)
 
-        assertTrue(result is DomainResult.Error)
-        assertEquals(expectedError, (result as DomainResult.Error).error)
+        assertTrue(result is Error)
+        assertEquals(expectedError, (result as Error).error)
     }
 
     @Test
@@ -213,8 +214,8 @@ class ParkingTest {
         method.isAccessible = true
         val result = method.invoke(parking, EventType.ENTRY, vehicle)
 
-        assertTrue(result is DomainResult.Error<*>)
-        val error = (result as? DomainResult.Error<*>)?.error
+        assertTrue(result is Error<*>)
+        val error = (result as? Error<*>)?.error
         assertEquals(
             ParkingDomainError.VehicleNotFoundForTransition(
                 eventType = EventType.ENTRY,

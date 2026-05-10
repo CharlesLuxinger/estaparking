@@ -1,9 +1,10 @@
 package com.charlesluxinger.estaparking.infra.client.simulator.garage
 
-import com.charlesluxinger.estaparking.domain.error.DomainResult
 import com.charlesluxinger.estaparking.domain.port.outbound.SimulatorGarageClientError.PayloadMappingFailure
 import com.charlesluxinger.estaparking.domain.port.outbound.SimulatorGarageClientError.TransportFailure
 import com.charlesluxinger.estaparking.domain.port.outbound.SimulatorGarageClientError.UnexpectedStatus
+import com.charlesluxinger.estaparking.domain.result.DomainResult.Error
+import com.charlesluxinger.estaparking.domain.result.DomainResult.Success
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
@@ -52,8 +53,8 @@ class SimulatorGarageRestTemplateAdapterTest {
 
         val result = adapter.fetchGarage()
 
-        assertTrue(result is DomainResult.Success)
-        result as DomainResult.Success
+        assertTrue(result is Success)
+        result as Success
         assertEquals(
             "A",
             result.value.garages
@@ -87,8 +88,8 @@ class SimulatorGarageRestTemplateAdapterTest {
 
         val result = adapter.fetchGarage()
 
-        assertTrue(result is DomainResult.Error)
-        result as DomainResult.Error
+        assertTrue(result is Error)
+        result as Error
         assertTrue(result.error is UnexpectedStatus)
         val error = result.error as UnexpectedStatus
         assertEquals(502, error.statusCode)
@@ -117,8 +118,8 @@ class SimulatorGarageRestTemplateAdapterTest {
 
         val result = adapter.fetchGarage()
 
-        assertTrue(result is DomainResult.Error)
-        result as DomainResult.Error
+        assertTrue(result is Error)
+        result as Error
         assertTrue(result.error is PayloadMappingFailure)
     }
 
@@ -138,8 +139,8 @@ class SimulatorGarageRestTemplateAdapterTest {
 
         val result = adapter.fetchGarage()
 
-        assertTrue(result is DomainResult.Error)
-        result as DomainResult.Error
+        assertTrue(result is Error)
+        result as Error
         assertTrue(result.error is TransportFailure)
     }
 

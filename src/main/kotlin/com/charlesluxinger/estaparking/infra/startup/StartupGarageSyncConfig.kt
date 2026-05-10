@@ -1,12 +1,13 @@
 package com.charlesluxinger.estaparking.infra.startup
 
 import com.charlesluxinger.estaparking.application.service.sync.StartupGarageSyncUseCaseImpl
-import com.charlesluxinger.estaparking.domain.error.DomainResult
 import com.charlesluxinger.estaparking.domain.port.inbound.sync.SyncGarageCommandPort
 import com.charlesluxinger.estaparking.domain.port.inbound.sync.SyncGarageError
 import com.charlesluxinger.estaparking.domain.port.outbound.BillingRepositoryPort
 import com.charlesluxinger.estaparking.domain.port.outbound.SimulatorGarageClientPort
 import com.charlesluxinger.estaparking.domain.port.outbound.SpotRepositoryPort
+import com.charlesluxinger.estaparking.domain.result.DomainResult.Error
+import com.charlesluxinger.estaparking.domain.result.DomainResult.Success
 import mu.KotlinLogging
 import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Bean
@@ -30,14 +31,14 @@ class StartupGarageSyncConfig {
     fun startupGarageSyncRunner(startupGarageSyncUseCase: SyncGarageCommandPort): ApplicationRunner =
         ApplicationRunner {
             when (val syncResult = startupGarageSyncUseCase.sync()) {
-                is DomainResult.Success -> {
+                is Success -> {
                     logger.info {
                         "Startup garage sync completed: garages=${syncResult.value.garagesSynced}, " +
                             "spots=${syncResult.value.spotsSynced}"
                     }
                 }
 
-                is DomainResult.Error -> {
+                is Error -> {
                     logger.warn {
                         "Startup garage sync skipped due to non-fatal error: ${syncResult.error.toLogMessage()}"
                     }

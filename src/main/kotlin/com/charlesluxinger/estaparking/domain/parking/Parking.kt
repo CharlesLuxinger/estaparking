@@ -1,9 +1,10 @@
 package com.charlesluxinger.estaparking.domain.parking
 
-import com.charlesluxinger.estaparking.domain.error.DomainResult
-import com.charlesluxinger.estaparking.domain.error.DomainResult.Error
 import com.charlesluxinger.estaparking.domain.error.ParkingDomainError
 import com.charlesluxinger.estaparking.domain.event.EventType
+import com.charlesluxinger.estaparking.domain.result.DomainResult
+import com.charlesluxinger.estaparking.domain.result.DomainResult.Error
+import com.charlesluxinger.estaparking.domain.result.DomainResult.Success
 import com.charlesluxinger.estaparking.domain.spot.Spot
 import com.charlesluxinger.estaparking.domain.spot.SpotStatus
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
@@ -40,7 +41,7 @@ data class Parking(
             when (val transition = spots[availableIndex].transition(EventType.ENTRY, vehicle)) {
                 is DomainResult.Success -> {
                     nextSpots[availableIndex] = transition.value
-                    DomainResult.Success(copy(spots = nextSpots))
+                    Success(copy(spots = nextSpots))
                 }
 
                 is Error -> Error(transition.error)
@@ -59,7 +60,7 @@ data class Parking(
             when (val transition = spots[index].transition(eventType, vehicle)) {
                 is DomainResult.Success -> {
                     val nextSpots = spots.toMutableList().apply { this[index] = transition.value }
-                    DomainResult.Success(copy(spots = nextSpots))
+                    Success(copy(spots = nextSpots))
                 }
 
                 is Error -> Error(transition.error)
