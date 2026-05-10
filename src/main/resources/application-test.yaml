@@ -1,11 +1,8 @@
 spring:
-  application:
-    name: estaparking
-
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/estaparking?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
-    username: ${DB_USERNAME:estaparking}
-    password: ${DB_PASSWORD:estaparking}
+    url: ${DB_TEST_URL:${DB_URL:jdbc:mysql://localhost:3306/estaparking_test?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}}
+    username: ${DB_TEST_USERNAME:${DB_USERNAME:estaparking}}
+    password: ${DB_TEST_PASSWORD:${DB_PASSWORD:estaparking}}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -19,5 +16,5 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
-    baseline-on-migrate: true
+    clean-disabled: false
     validate-on-migrate: true

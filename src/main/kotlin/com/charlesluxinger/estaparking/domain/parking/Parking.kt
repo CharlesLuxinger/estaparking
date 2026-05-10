@@ -32,7 +32,7 @@ data class Parking(
 
     private fun allocateForEntry(vehicle: Vehicle): DomainResult<Parking, ParkingDomainError> =
         if (isFull()) {
-            DomainResult.Error(ParkingDomainError.FullOccupancyEntryDenied)
+            Error(ParkingDomainError.FullOccupancyEntryDenied)
         } else {
             val nextSpots = spots.toMutableList()
             val availableIndex = spots.indexOfFirst { it.canAcceptEntry() }
@@ -43,7 +43,7 @@ data class Parking(
                     DomainResult.Success(copy(spots = nextSpots))
                 }
 
-                is Error -> DomainResult.Error(transition.error)
+                is Error -> Error(transition.error)
             }
         }
 
@@ -62,7 +62,7 @@ data class Parking(
                     DomainResult.Success(copy(spots = nextSpots))
                 }
 
-                is Error -> DomainResult.Error(transition.error)
+                is Error -> Error(transition.error)
             }
         }
     }
@@ -80,7 +80,7 @@ data class Parking(
 
         val spotExpectingDifferentVehicle = spots.firstOrNull { it.status == expectedStatus && it.occupiedBy != null }
         if (spotExpectingDifferentVehicle != null) {
-            return DomainResult.Error(
+            return Error(
                 ParkingDomainError.WrongVehicleTransitionAttempt(
                     spotId = spotExpectingDifferentVehicle.id,
                     expectedPlate = spotExpectingDifferentVehicle.occupiedBy!!.plate,
@@ -91,7 +91,7 @@ data class Parking(
 
         return when (eventType) {
             EventType.PARKED -> {
-                DomainResult.Error(
+                Error(
                     ParkingDomainError.InvalidParkedOrdering(
                         spotId = "unknown",
                         currentStatus = SpotStatus.AVAILABLE,
@@ -100,7 +100,7 @@ data class Parking(
             }
 
             EventType.EXIT -> {
-                DomainResult.Error(
+                Error(
                     ParkingDomainError.ExitBeforeEntry(
                         spotId = "unknown",
                         currentStatus = SpotStatus.AVAILABLE,
@@ -109,7 +109,7 @@ data class Parking(
             }
 
             EventType.ENTRY -> {
-                DomainResult.Error(
+                Error(
                     ParkingDomainError.VehicleNotFoundForTransition(
                         eventType = eventType,
                         vehiclePlate = vehicle.plate,
