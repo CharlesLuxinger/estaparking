@@ -55,14 +55,14 @@ class PersistenceRepositoryIntegrationTest {
                 spots =
                     listOf(
                         Spot(
-                            id = "A-01",
+                            id = 1L,
                             sector = "A",
                             coordinates = Coordinates(BigDecimal("-23.5500000"), BigDecimal("-46.6300000")),
                             status = SpotStatus.ENTRY_REGISTERED,
                             occupiedBy = Vehicle("ABC1234"),
                         ),
                         Spot(
-                            id = "A-02",
+                            id = 2L,
                             sector = "A",
                             coordinates = Coordinates(BigDecimal("-23.5501000"), BigDecimal("-46.6301000")),
                             status = SpotStatus.PARKED,
@@ -98,7 +98,7 @@ class PersistenceRepositoryIntegrationTest {
                 spots =
                     listOf(
                         Spot(
-                            id = "B-01",
+                            id = 3L,
                             sector = "B",
                             coordinates = Coordinates(BigDecimal("-23.5510000"), BigDecimal("-46.6310000")),
                         ),

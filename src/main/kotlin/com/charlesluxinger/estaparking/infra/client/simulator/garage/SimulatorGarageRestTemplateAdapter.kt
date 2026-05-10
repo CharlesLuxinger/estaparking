@@ -8,52 +8,64 @@ import com.charlesluxinger.estaparking.domain.port.outbound.SimulatorGarageClien
 import com.charlesluxinger.estaparking.domain.port.outbound.SimulatorGarageClientPort
 import com.charlesluxinger.estaparking.domain.port.outbound.dto.SimulatorGarageSnapshot
 import com.charlesluxinger.estaparking.infra.client.simulator.garage.dto.SimulatorGarageResponse
-import io.ktor.client.HttpClient
-import io.ktor.client.call.NoTransformationFoundException
-import io.ktor.client.call.body
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.isSuccess
-import io.ktor.serialization.JsonConvertException
-import kotlinx.coroutines.runBlocking
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Repository
+import org.springframework.web.client.ResourceAccessException
+import org.springframework.web.client.RestClientResponseException
+import org.springframework.web.client.RestTemplate
 import java.io.IOException
 
 @Repository
-class SimulatorGarageKtorAdapter(
+class SimulatorGarageRestTemplateAdapter(
     @Value("\${simulator.base-url:http://localhost:3000}")
     private val simulatorBaseUrl: String,
-    @Qualifier("simulatorGarageHttpClient")
-    private val client: HttpClient,
+    @Qualifier("simulatorGarageRestTemplate")
+    private val restTemplate: RestTemplate,
+    private val objectMapper: ObjectMapper,
 ) : SimulatorGarageClientPort {
     override fun fetchGarage(): DomainResult<SimulatorGarageSnapshot, SimulatorGarageClientError> =
-        runBlocking {
-            runCatching {
-                val response = client.get("$simulatorBaseUrl/garage")
+        runCatching {
+            val response = restTemplate.getForEntity("$simulatorBaseUrl/garage", String::class.java)
+            response.toDomain()
+        }.getOrElse { it.toDomainResultOrThrow() }
 
-                if (!response.status.isSuccess()) {
-                    return@runBlocking DomainResult.Error(
-                        UnexpectedStatus(
-                            statusCode = response.status.value,
-                            responseBody = response.bodyAsText(),
-                        ),
-                    )
-                }
+    private fun ResponseEntity<String>.toDomain(): DomainResult<SimulatorGarageSnapshot, SimulatorGarageClientError> =
+        when {
+            !statusCode.is2xxSuccessful ->
+                DomainResult.Error(
+                    UnexpectedStatus(
+                        statusCode = statusCode.value(),
+                        responseBody = body.orEmpty(),
+                    ),
+                )
 
-                response.body<SimulatorGarageResponse>().toSnapshot()
-            }.getOrElse { it.toDomainResultOrThrow() }
+            body == null -> DomainResult.Error(PayloadMappingFailure("Empty simulator /garage payload"))
+
+            else -> {
+                val payload = objectMapper.readValue(body, SimulatorGarageResponse::class.java)
+                payload.toSnapshot()
+            }
         }
 
     private fun Throwable.toDomainResultOrThrow(): DomainResult<SimulatorGarageSnapshot, SimulatorGarageClientError> =
         when (this) {
+            is JsonProcessingException,
+            -> DomainResult.Error(PayloadMappingFailure(message ?: "Invalid simulator /garage payload"))
+
+            is ResourceAccessException,
             is IOException,
             -> DomainResult.Error(TransportFailure(message ?: "I/O error while calling simulator /garage"))
+
             is IllegalArgumentException,
-            is JsonConvertException,
-            is NoTransformationFoundException,
             -> DomainResult.Error(PayloadMappingFailure(message ?: "Invalid simulator /garage payload"))
+
+            is RestClientResponseException,
+            -> DomainResult.Error(UnexpectedStatus(statusCode.value(), responseBodyAsString))
+
             else -> throw this
         }
 }

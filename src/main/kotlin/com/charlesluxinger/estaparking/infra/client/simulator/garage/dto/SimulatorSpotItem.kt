@@ -7,7 +7,7 @@ import com.charlesluxinger.estaparking.domain.spot.Spot
 import java.math.BigDecimal
 
 data class SimulatorSpotItem(
-    val id: String,
+    val id: Long,
     val sector: String,
     val lat: BigDecimal,
     val lng: BigDecimal,

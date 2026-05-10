@@ -22,7 +22,7 @@ class SpotTest {
         assertEquals(original, sameValues)
         assertEquals(original.hashCode(), sameValues.hashCode())
         assertNotEquals(original, different)
-        assertEquals("spot-1", original.id)
+        assertEquals(1L, original.id)
         assertEquals("A", original.sector)
         assertEquals(
             Coordinates(
@@ -40,23 +40,23 @@ class SpotTest {
             ),
             original.coordinates,
         )
-        assertTrue(original.toString().contains("Spot(id=spot-1, sector=A"))
+        assertTrue(original.toString().contains("Spot(id=1, sector=A"))
     }
 
     @Test
     fun `constructor with valid id and sector succeeds`() {
         val spot = createAvailableSpot()
 
-        assertEquals("spot-1", spot.id)
+        assertEquals(1L, spot.id)
         assertEquals("A", spot.sector)
     }
 
     @Test
-    fun `constructor with blank id throws exception`() {
+    fun `constructor with non-positive id throws exception`() {
         val exception =
             assertThrows(IllegalArgumentException::class.java) {
                 Spot(
-                    id = "   ",
+                    id = 0,
                     sector = "A",
                     coordinates =
                         Coordinates(
@@ -66,7 +66,7 @@ class SpotTest {
                 )
             }
 
-        assertEquals("Spot id must not be blank", exception.message)
+        assertEquals("Spot id must be greater than zero", exception.message)
     }
 
     @Test
@@ -74,7 +74,7 @@ class SpotTest {
         val exception =
             assertThrows(IllegalArgumentException::class.java) {
                 Spot(
-                    id = "spot-1",
+                    id = 1L,
                     sector = "   ",
                     coordinates =
                         Coordinates(
@@ -209,7 +209,7 @@ class SpotTest {
         val vehicle = Vehicle(plate = "ABC1234")
         val spot =
             Spot(
-                id = "spot-1",
+                id = 1L,
                 sector = "A",
                 coordinates =
                     Coordinates(
@@ -225,7 +225,7 @@ class SpotTest {
         assertTrue(result is Error)
         assertEquals(
             ParkingDomainError.InvalidParkedOrdering(
-                spotId = "spot-1",
+                spotId = 1L,
                 currentStatus = SpotStatus.AVAILABLE,
             ),
             (result as Error).error,
@@ -237,7 +237,7 @@ class SpotTest {
         val vehicle = Vehicle(plate = "ABC1234")
         val spot =
             Spot(
-                id = "spot-1",
+                id = 1L,
                 sector = "A",
                 coordinates =
                     Coordinates(
@@ -253,7 +253,7 @@ class SpotTest {
         assertTrue(result is Error)
         assertEquals(
             ParkingDomainError.WrongVehicleTransitionAttempt(
-                spotId = "spot-1",
+                spotId = 1L,
                 expectedPlate = "none",
                 attemptedPlate = vehicle.plate,
             ),
@@ -266,7 +266,7 @@ class SpotTest {
         val vehicle = Vehicle(plate = "ABC1234")
         val spot =
             Spot(
-                id = "spot-1",
+                id = 1L,
                 sector = "A",
                 coordinates =
                     Coordinates(
@@ -282,7 +282,7 @@ class SpotTest {
         assertTrue(result is Error)
         assertEquals(
             ParkingDomainError.WrongVehicleTransitionAttempt(
-                spotId = "spot-1",
+                spotId = 1L,
                 expectedPlate = "none",
                 attemptedPlate = vehicle.plate,
             ),
@@ -292,7 +292,7 @@ class SpotTest {
 
     private fun createAvailableSpot(): Spot =
         Spot(
-            id = "spot-1",
+            id = 1L,
             sector = "A",
             coordinates =
                 Coordinates(

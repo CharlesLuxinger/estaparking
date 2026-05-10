@@ -12,22 +12,22 @@ sealed interface ParkingDomainError {
     ) : ParkingDomainError
 
     data class ExitBeforeEntry(
-        val spotId: String,
+        val spotId: Long,
         val currentStatus: SpotStatus,
     ) : ParkingDomainError
 
     data class InvalidParkedOrdering(
-        val spotId: String,
+        val spotId: Long,
         val currentStatus: SpotStatus,
     ) : ParkingDomainError
 
     data class InvalidExitOrdering(
-        val spotId: String,
+        val spotId: Long,
         val currentStatus: SpotStatus,
     ) : ParkingDomainError
 
     data class WrongVehicleTransitionAttempt(
-        val spotId: String,
+        val spotId: Long,
         val expectedPlate: String,
         val attemptedPlate: String,
     ) : ParkingDomainError

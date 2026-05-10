@@ -27,11 +27,11 @@ class ParkingDomainErrorTest {
     fun `exit before entry keeps spot data`() {
         val error =
             ParkingDomainError.ExitBeforeEntry(
-                spotId = "spot-1",
+                spotId = 1L,
                 currentStatus = SpotStatus.AVAILABLE,
             )
 
-        assertEquals("spot-1", error.spotId)
+        assertEquals(1L, error.spotId)
         assertEquals(SpotStatus.AVAILABLE, error.currentStatus)
     }
 
@@ -39,11 +39,11 @@ class ParkingDomainErrorTest {
     fun `invalid parked ordering keeps spot data`() {
         val error =
             ParkingDomainError.InvalidParkedOrdering(
-                spotId = "spot-1",
+                spotId = 1L,
                 currentStatus = SpotStatus.ENTRY_REGISTERED,
             )
 
-        assertEquals("spot-1", error.spotId)
+        assertEquals(1L, error.spotId)
         assertEquals(SpotStatus.ENTRY_REGISTERED, error.currentStatus)
     }
 
@@ -51,11 +51,11 @@ class ParkingDomainErrorTest {
     fun `invalid exit ordering keeps spot data`() {
         val error =
             ParkingDomainError.InvalidExitOrdering(
-                spotId = "spot-1",
+                spotId = 1L,
                 currentStatus = SpotStatus.PARKED,
             )
 
-        assertEquals("spot-1", error.spotId)
+        assertEquals(1L, error.spotId)
         assertEquals(SpotStatus.PARKED, error.currentStatus)
     }
 
@@ -63,12 +63,12 @@ class ParkingDomainErrorTest {
     fun `wrong vehicle transition attempt keeps expected and attempted plates`() {
         val error =
             ParkingDomainError.WrongVehicleTransitionAttempt(
-                spotId = "spot-1",
+                spotId = 1L,
                 expectedPlate = "ABC1234",
                 attemptedPlate = "XYZ9876",
             )
 
-        assertEquals("spot-1", error.spotId)
+        assertEquals(1L, error.spotId)
         assertEquals("ABC1234", error.expectedPlate)
         assertEquals("XYZ9876", error.attemptedPlate)
     }

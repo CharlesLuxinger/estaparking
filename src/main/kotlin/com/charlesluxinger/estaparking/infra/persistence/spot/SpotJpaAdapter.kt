@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository
 class SpotJpaAdapter(
     private val repository: SpotSpringDataRepository,
 ) : SpotRepositoryPort {
-    override fun findById(spotId: String): Spot? = repository.findBySpotId(spotId)?.toDomain()
+    override fun findById(spotId: Long): Spot? = repository.findById(spotId).orElse(null)?.toDomain()
 
     override fun save(spot: Spot): Spot = repository.save(SpotEntity.fromDomain(spot)).toDomain()
 

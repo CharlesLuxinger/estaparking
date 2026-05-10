@@ -8,8 +8,6 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 import java.math.BigDecimal
@@ -18,10 +16,8 @@ import java.math.BigDecimal
 @Table(name = "spots")
 class SpotEntity(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
-    @Column(name = "spot_id", nullable = false, unique = true)
-    val spotId: String = "",
+    @Column(name = "id", nullable = false)
+    val id: Long = 0,
     @Column(name = "sector", nullable = false)
     val sector: String = "",
     @Column(name = "latitude", nullable = false, precision = 10, scale = 7)
@@ -36,7 +32,7 @@ class SpotEntity(
 ) {
     fun toDomain(): Spot =
         Spot(
-            id = spotId,
+            id = id,
             sector = sector,
             coordinates =
                 Coordinates(
@@ -50,7 +46,7 @@ class SpotEntity(
     companion object {
         fun fromDomain(domain: Spot): SpotEntity =
             SpotEntity(
-                spotId = domain.id,
+                id = domain.id,
                 sector = domain.sector,
                 latitude = domain.coordinates.latitude,
                 longitude = domain.coordinates.longitude,

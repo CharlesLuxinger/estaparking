@@ -200,7 +200,7 @@ class HandleWebhookEventUseCaseImplTest {
             spots =
                 listOf(
                     Spot(
-                        id = "A-01",
+                        id = 1L,
                         sector = "A",
                         coordinates = Coordinates(BigDecimal("-23.5500000"), BigDecimal("-46.6300000")),
                     ),
@@ -217,7 +217,7 @@ class HandleWebhookEventUseCaseImplTest {
             spots =
                 listOf(
                     Spot(
-                        id = "A-01",
+                        id = 1L,
                         sector = "A",
                         coordinates = Coordinates(BigDecimal("-23.5500000"), BigDecimal("-46.6300000")),
                         status = SpotStatus.ENTRY_REGISTERED,

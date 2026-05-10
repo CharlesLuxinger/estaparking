@@ -29,7 +29,7 @@ class StartupGarageSyncUseCaseImplTest {
         val spots =
             listOf(
                 Spot(
-                    id = "A-01",
+                    id = 1L,
                     sector = "A",
                     coordinates =
                         Coordinates(

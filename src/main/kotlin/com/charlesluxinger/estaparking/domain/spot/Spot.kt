@@ -6,14 +6,14 @@ import com.charlesluxinger.estaparking.domain.event.EventType
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 
 data class Spot(
-    val id: String,
+    val id: Long,
     val sector: String,
     val coordinates: Coordinates,
     val status: SpotStatus = SpotStatus.AVAILABLE,
     val occupiedBy: Vehicle? = null,
 ) {
     init {
-        require(id.isNotBlank()) { "Spot id must not be blank" }
+        require(id > 0) { "Spot id must be greater than zero" }
         require(sector.isNotBlank()) { "Spot sector must not be blank" }
     }
 

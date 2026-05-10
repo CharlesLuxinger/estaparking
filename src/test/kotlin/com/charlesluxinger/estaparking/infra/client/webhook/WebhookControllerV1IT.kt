@@ -140,7 +140,7 @@ class WebhookControllerV1IT {
         recordingWebhookEventCommandPort.nextOutcome =
             WebhookEventOutcome.RejectedTransition(
                 ParkingDomainError.InvalidParkedOrdering(
-                    spotId = "A-01",
+                    spotId = 1L,
                     currentStatus = SpotStatus.AVAILABLE,
                 ),
             )

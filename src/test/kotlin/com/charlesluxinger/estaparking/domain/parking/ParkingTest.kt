@@ -72,7 +72,7 @@ class ParkingTest {
     fun `apply ENTRY when parking is full returns FullOccupancyEntryDenied`() {
         val occupiedSpot =
             createSpot(
-                id = "spot-1",
+                id = 1L,
                 status = SpotStatus.ENTRY_REGISTERED,
                 occupiedBy = Vehicle(plate = "AAA0000"),
             )
@@ -92,7 +92,7 @@ class ParkingTest {
         assertTrue(result is DomainResult.Error)
         assertEquals(
             ParkingDomainError.ExitBeforeEntry(
-                spotId = "unknown",
+                spotId = -1L,
                 currentStatus = SpotStatus.AVAILABLE,
             ),
             (result as DomainResult.Error).error,
@@ -107,7 +107,7 @@ class ParkingTest {
         assertTrue(result is DomainResult.Error)
         assertEquals(
             ParkingDomainError.InvalidParkedOrdering(
-                spotId = "unknown",
+                spotId = -1L,
                 currentStatus = SpotStatus.AVAILABLE,
             ),
             (result as DomainResult.Error).error,
@@ -126,7 +126,7 @@ class ParkingTest {
         assertTrue(result is DomainResult.Error)
         assertEquals(
             ParkingDomainError.WrongVehicleTransitionAttempt(
-                spotId = "spot-1",
+                spotId = 1L,
                 expectedPlate = entryVehicle.plate,
                 attemptedPlate = wrongVehicle.plate,
             ),
@@ -147,7 +147,7 @@ class ParkingTest {
         assertTrue(result is DomainResult.Error)
         assertEquals(
             ParkingDomainError.WrongVehicleTransitionAttempt(
-                spotId = "spot-1",
+                spotId = 1L,
                 expectedPlate = entryVehicle.plate,
                 attemptedPlate = wrongVehicle.plate,
             ),
@@ -171,7 +171,7 @@ class ParkingTest {
         assertTrue(result is DomainResult.Error)
         assertEquals(
             ParkingDomainError.InvalidExitOrdering(
-                spotId = "spot-1",
+                spotId = 1L,
                 currentStatus = SpotStatus.ENTRY_REGISTERED,
             ),
             (result as DomainResult.Error).error,
@@ -183,7 +183,7 @@ class ParkingTest {
         val vehicle = Vehicle(plate = "ABC1234")
         val expectedError =
             ParkingDomainError.InvalidParkedOrdering(
-                spotId = "spot-err",
+                spotId = 99L,
                 currentStatus = SpotStatus.ENTRY_REGISTERED,
             )
         val failingSpot = mockk<Spot>()
@@ -228,11 +228,11 @@ class ParkingTest {
         Parking(
             id = "parking-1",
             name = "Central",
-            spots = listOf(createSpot(id = "spot-1"), createSpot(id = "spot-2")),
+            spots = listOf(createSpot(id = 1L), createSpot(id = 2L)),
         )
 
     private fun createSpot(
-        id: String,
+        id: Long,
         status: SpotStatus = SpotStatus.AVAILABLE,
         occupiedBy: Vehicle? = null,
     ): Spot =
