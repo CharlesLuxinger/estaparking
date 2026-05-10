@@ -12,8 +12,48 @@
     "hash": "1f8a8a130289c2cd440d958832b54109"
   },
   "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\Application.kt": {
-    "mtime": 1778357970.00939,
-    "hash": "8ad1ab1aa6d8bbccc6b08a7cdb8856f3"
+    "mtime": 1778367991.7429347,
+    "hash": "ef326c79edf9029f961b8cd9daa2499b"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\error\\DomainResult.kt": {
+    "mtime": 1778368028.852578,
+    "hash": "7b439f7edc743232e4f828e7f71f6133"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\error\\ParkingDomainError.kt": {
+    "mtime": 1778365806.5286283,
+    "hash": "c84af0b786037994826f482180ff0151"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\event\\EventType.kt": {
+    "mtime": 1778365320.1372561,
+    "hash": "5cf575b67d4ba373b5beb06632cb76ba"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\event\\ParkingEvent.kt": {
+    "mtime": 1778365322.3130965,
+    "hash": "2d1297ff0299e5edb9c1772bfb56aafd"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\garage\\Garage.kt": {
+    "mtime": 1778367091.264711,
+    "hash": "268c30b312a3869b7363a8de8eb67a3f"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\parking\\Parking.kt": {
+    "mtime": 1778368029.0142078,
+    "hash": "a5835d1db9fcb739b5e95660b2e5ae8a"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\spot\\Coordinates.kt": {
+    "mtime": 1778366273.8835042,
+    "hash": "1f78a8bd1330ffd0eca8d1076c51676f"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\spot\\Spot.kt": {
+    "mtime": 1778368029.0856965,
+    "hash": "d799e83ac4c1c0cc8247dd0177e4902f"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\spot\\SpotStatus.kt": {
+    "mtime": 1778365473.1346068,
+    "hash": "1968a02205540174b4f8766989c3090b"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\vehicle\\Vehicle.kt": {
+    "mtime": 1778366768.9841506,
+    "hash": "9cea4be2c10d0cca03c3095e9324bcf9"
   },
   "C:\\Users\\charl\\Projetos\\estaparking\\src\\test\\kotlin\\com\\charlesluxinger\\estaparking\\architecture\\ArchitectureScaffoldTest.kt": {
     "mtime": 1778350073.2583282,
@@ -34,6 +74,26 @@
   "C:\\Users\\charl\\Projetos\\estaparking\\src\\test\\kotlin\\com\\charlesluxinger\\estaparking\\architecture\\UseCaseOwnershipTest.kt": {
     "mtime": 1778344005.842035,
     "hash": "6dcbac716ddd72069a47b1ac26ab0ae5"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\test\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\error\\ParkingDomainErrorTest.kt": {
+    "mtime": 1778368570.7810366,
+    "hash": "9a56185ff4030ad115af757fe1c3cfed"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\test\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\garage\\GarageTest.kt": {
+    "mtime": 1778368030.2991772,
+    "hash": "9260fc99251313dbf7621c45ef3e07d9"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\test\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\parking\\ParkingTest.kt": {
+    "mtime": 1778368712.0623364,
+    "hash": "63910933da739c15568b626a72d3e623"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\test\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\spot\\SpotTest.kt": {
+    "mtime": 1778368561.2460406,
+    "hash": "f1f6b65f602239c0656d13affa095c8b"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\test\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\vehicle\\VehicleTest.kt": {
+    "mtime": 1778366794.6268442,
+    "hash": "64150bda0c0d4be3c48b8d28408a61ba"
   },
   "C:\\Users\\charl\\Projetos\\estaparking\\AGENTS.md": {
     "mtime": 1778296694.1758363,
