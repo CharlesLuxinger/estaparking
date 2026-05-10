@@ -52,4 +52,50 @@ class PricingPolicyTest {
     fun `occupancyMultiplier applies plus twenty five percent up to 100`() {
         assertEquals(BigDecimal("1.25"), PricingPolicy.occupancyMultiplier(BigDecimal("100")))
     }
+
+    @Test
+    fun `occupancyMultiplier applies 90 percent below 25`() {
+        assertEquals(BigDecimal("0.90"), PricingPolicy.occupancyMultiplier(BigDecimal("24")))
+    }
+
+    @Test
+    fun `occupancyMultiplier applies 125 percent above 75`() {
+        assertEquals(BigDecimal("1.25"), PricingPolicy.occupancyMultiplier(BigDecimal("76")))
+    }
+
+    @Test
+    fun `calculateAmount throws for zero base price`() {
+        val exception =
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException::class.java) {
+                PricingPolicy.calculateAmount(BigDecimal.ZERO, 60, BigDecimal("50"))
+            }
+        assertEquals("Base price must be greater than zero", exception.message)
+    }
+
+    @Test
+    fun `calculateAmount throws for negative parked minutes`() {
+        val exception =
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException::class.java) {
+                PricingPolicy.calculateAmount(BigDecimal("10.00"), -1, BigDecimal("50"))
+            }
+        assertEquals("Parked minutes must be non-negative", exception.message)
+    }
+
+    @Test
+    fun `occupancyMultiplier throws for negative occupancy`() {
+        val exception =
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException::class.java) {
+                PricingPolicy.occupancyMultiplier(BigDecimal("-1"))
+            }
+        assertEquals("Occupancy percentage must be non-negative", exception.message)
+    }
+
+    @Test
+    fun `occupancyMultiplier throws for occupancy above 100`() {
+        val exception =
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException::class.java) {
+                PricingPolicy.occupancyMultiplier(BigDecimal("101"))
+            }
+        assertEquals("Occupancy percentage must be at most 100", exception.message)
+    }
 }
