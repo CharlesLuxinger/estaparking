@@ -4,4 +4,8 @@ import com.charlesluxinger.estaparking.domain.garage.Garage
 
 interface BillingRepositoryPort {
     fun findGarageBySector(sector: String): Garage?
+
+    fun save(garage: Garage): Garage
+
+    fun saveAll(garages: List<Garage>): List<Garage>
 }

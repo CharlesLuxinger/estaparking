@@ -58,7 +58,7 @@ class ParkingSpotSnapshotEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
     @Column(name = "spot_id", nullable = false)
-    val spotId: String = "",
+    val spotId: Long = 0,
     @Column(name = "sector", nullable = false)
     val sector: String = "",
     @Column(name = "latitude", nullable = false, precision = 10, scale = 7)

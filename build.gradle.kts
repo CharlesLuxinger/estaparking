@@ -51,8 +51,8 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.17")
     testImplementation("org.testcontainers:mysql:1.20.4")
     testImplementation("org.testcontainers:junit-jupiter:1.20.4")
-    testImplementation("io.rest-assured:rest-assured:5.5.0")
-    testImplementation("io.rest-assured:kotlin-extensions:5.5.0")
+    testImplementation("io.rest-assured:rest-assured:6.0.0")
+    testImplementation("io.rest-assured:kotlin-extensions:6.0.0")
 }
 
 kotlin {

@@ -9,14 +9,12 @@ CREATE TABLE garages (
 
 CREATE TABLE spots (
     id BIGINT NOT NULL AUTO_INCREMENT,
-    spot_id VARCHAR(128) NOT NULL,
     sector VARCHAR(64) NOT NULL,
     latitude DECIMAL(10,7) NOT NULL,
     longitude DECIMAL(10,7) NOT NULL,
     status VARCHAR(32) NOT NULL,
     occupied_by_plate VARCHAR(16),
-    PRIMARY KEY (id),
-    CONSTRAINT uk_spots_spot_id UNIQUE (spot_id)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE parking_sessions (
@@ -30,7 +28,7 @@ CREATE TABLE parking_sessions (
 CREATE TABLE parking_spot_snapshots (
     id BIGINT NOT NULL AUTO_INCREMENT,
     parking_session_id BIGINT NOT NULL,
-    spot_id VARCHAR(128) NOT NULL,
+    spot_id BIGINT NOT NULL,
     sector VARCHAR(64) NOT NULL,
     latitude DECIMAL(10,7) NOT NULL,
     longitude DECIMAL(10,7) NOT NULL,

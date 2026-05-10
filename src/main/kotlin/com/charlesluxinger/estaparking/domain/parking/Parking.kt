@@ -93,7 +93,7 @@ data class Parking(
             EventType.PARKED -> {
                 Error(
                     ParkingDomainError.InvalidParkedOrdering(
-                        spotId = "unknown",
+                        spotId = -1L,
                         currentStatus = SpotStatus.AVAILABLE,
                     ),
                 )
@@ -102,7 +102,7 @@ data class Parking(
             EventType.EXIT -> {
                 Error(
                     ParkingDomainError.ExitBeforeEntry(
-                        spotId = "unknown",
+                        spotId = -1L,
                         currentStatus = SpotStatus.AVAILABLE,
                     ),
                 )

@@ -1,7 +1,7 @@
 {
   "C:\\Users\\charl\\Projetos\\estaparking\\build.gradle.kts": {
-    "mtime": 1778350073.24733,
-    "hash": "a6ba6129cd33e074aa96f497f7ee9df7"
+    "mtime": 1778380987.3565154,
+    "hash": "689659c8b093a1ce9921f47d60116621"
   },
   "C:\\Users\\charl\\Projetos\\estaparking\\gradlew": {
     "mtime": 1778357970.0043921,
@@ -15,9 +15,17 @@
     "mtime": 1778371554.0372248,
     "hash": "a7b1d85aae7535fccb0a902975104723"
   },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\application\\service\\sync\\StartupGarageSyncUseCaseImpl.kt": {
+    "mtime": 1778390251.218779,
+    "hash": "0173f1c9a9f1c25e265c24d0d82a3dbc"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\application\\service\\webhook\\HandleWebhookEventUseCaseImpl.kt": {
+    "mtime": 1778386996.007893,
+    "hash": "23713eab34eb38cbffed0bd9b90f0119"
+  },
   "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\error\\DomainResult.kt": {
-    "mtime": 1778371554.038224,
-    "hash": "b1cfe9aad9d220363d39e88cf3f13ee9"
+    "mtime": 1778389717.181124,
+    "hash": "0150600f3798c5ec2acf84c83f704173"
   },
   "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\error\\ParkingDomainError.kt": {
     "mtime": 1778371554.038224,
@@ -43,9 +51,25 @@
     "mtime": 1778376517.454237,
     "hash": "ee9eef379f2c956f9cbbff45f42d45e0"
   },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\port\\inbound\\sync\\SyncGarageCommandPort.kt": {
+    "mtime": 1778382915.8896923,
+    "hash": "35dbf03f348fd6921f11ea98e4adb132"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\port\\inbound\\webhook\\WebhookEventCommandPort.kt": {
+    "mtime": 1778386304.689891,
+    "hash": "cc7cf5cfc075402281df6c7947869f56"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\port\\inbound\\webhook\\model\\WebhookEventCommand.kt": {
+    "mtime": 1778383862.7043672,
+    "hash": "57145d149010437f967cdd1fa73fd53f"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\port\\inbound\\webhook\\model\\WebhookEventOutcome.kt": {
+    "mtime": 1778386597.2405825,
+    "hash": "cd539b89ee92d21aea2647ab1cea3e96"
+  },
   "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\port\\outbound\\BillingRepositoryPort.kt": {
-    "mtime": 1778372226.3688424,
-    "hash": "1a8c883cca47b9c43083adc08ecdc5e6"
+    "mtime": 1778381215.76203,
+    "hash": "88e24b252c45f9ca1e4521452c005458"
   },
   "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\port\\outbound\\ParkingEventRepositoryPort.kt": {
     "mtime": 1778372223.5063312,
@@ -55,9 +79,21 @@
     "mtime": 1778372215.8453822,
     "hash": "ac81b9f181379e4b7c0eb7a689857ad8"
   },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\port\\outbound\\SimulatorGarageClientError.kt": {
+    "mtime": 1778384366.468932,
+    "hash": "a2ca4af9a974d6e56b045d122be46f01"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\port\\outbound\\SimulatorGarageClientPort.kt": {
+    "mtime": 1778384503.0100565,
+    "hash": "3d1d922713f735749cd28120696baa53"
+  },
   "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\port\\outbound\\SpotRepositoryPort.kt": {
     "mtime": 1778372212.6443453,
     "hash": "5423e381843fbd584bddc682c3aaec49"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\port\\outbound\\dto\\SimulatorGarageSnapshot.kt": {
+    "mtime": 1778384366.459953,
+    "hash": "4afa54bfa8b9d6de7f2e58e41d1a65ae"
   },
   "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\domain\\spot\\Coordinates.kt": {
     "mtime": 1778371554.041225,
@@ -75,9 +111,41 @@
     "mtime": 1778371554.0422246,
     "hash": "40991e8aa535cbe33c73c46835e92341"
   },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\infra\\client\\simulator\\garage\\SimulatorGarageClientConfig.kt": {
+    "mtime": 1778387423.1617737,
+    "hash": "62ec775ceadc6b3800e48bd0423c3b14"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\infra\\client\\simulator\\garage\\SimulatorGarageKtorAdapter.kt": {
+    "mtime": 1778390375.8141642,
+    "hash": "4a59c1d1e32c288c9c370f1ec8b809f6"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\infra\\client\\simulator\\garage\\dto\\SimulatorGarageItem.kt": {
+    "mtime": 1778389375.3219683,
+    "hash": "6159ccd321f8608df7a828da18b8d5b1"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\infra\\client\\simulator\\garage\\dto\\SimulatorGarageResponse.kt": {
+    "mtime": 1778389717.1765301,
+    "hash": "6cbd92c2dff3de7d4e33da6462afa8bc"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\infra\\client\\simulator\\garage\\dto\\SimulatorSpotItem.kt": {
+    "mtime": 1778389375.3908012,
+    "hash": "119a4bcebb4251ecf6f7906f3bbd95c9"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\infra\\client\\webhook\\WebhookConfig.kt": {
+    "mtime": 1778385304.1308239,
+    "hash": "d0ea3d746b7eb578f92f458addebcb36"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\infra\\client\\webhook\\WebhookControllerV1.kt": {
+    "mtime": 1778386622.46487,
+    "hash": "70b5a8f239b2cbec8563f642b0db9673"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\infra\\client\\webhook\\WebhookEventRequest.kt": {
+    "mtime": 1778390251.1778271,
+    "hash": "947d11980b52527f4023d6836c1effe2"
+  },
   "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\infra\\persistence\\billing\\BillingJpaAdapter.kt": {
-    "mtime": 1778374128.5338058,
-    "hash": "f788ef5242f7b600d49a139d50f4bfe3"
+    "mtime": 1778381219.2526834,
+    "hash": "0ae74f8f400b5c8f869480d63cee2078"
   },
   "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\infra\\persistence\\billing\\BillingSpringDataRepository.kt": {
     "mtime": 1778374118.531425,
@@ -123,9 +191,21 @@
     "mtime": 1778374076.1527057,
     "hash": "5e236bbf6facd0fdf3af4a6dcec377e9"
   },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\kotlin\\com\\charlesluxinger\\estaparking\\infra\\startup\\StartupGarageSyncConfig.kt": {
+    "mtime": 1778382941.418391,
+    "hash": "0d82c6eb2de8d206c19d347f5bf88dbc"
+  },
   "C:\\Users\\charl\\Projetos\\estaparking\\src\\main\\resources\\db\\migration\\V1__create_persistence_schema.sql": {
     "mtime": 1778375097.6875522,
     "hash": "aea0210e194ba244d0bfb99742081103"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\test\\kotlin\\com\\charlesluxinger\\estaparking\\application\\service\\sync\\StartupGarageSyncUseCaseImplTest.kt": {
+    "mtime": 1778384592.781807,
+    "hash": "fef91b02122d3c04baaee62fbd2b143d"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\test\\kotlin\\com\\charlesluxinger\\estaparking\\application\\service\\webhook\\HandleWebhookEventUseCaseImplTest.kt": {
+    "mtime": 1778386996.586452,
+    "hash": "b54f81c0a800acd831263d52ed963440"
   },
   "C:\\Users\\charl\\Projetos\\estaparking\\src\\test\\kotlin\\com\\charlesluxinger\\estaparking\\architecture\\ArchitectureScaffoldTest.kt": {
     "mtime": 1778350073.2583282,
@@ -175,9 +255,21 @@
     "mtime": 1778371554.0467372,
     "hash": "9f34769501cbbc0d7e595e8a55c1a6eb"
   },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\test\\kotlin\\com\\charlesluxinger\\estaparking\\infra\\client\\simulator\\garage\\SimulatorGarageKtorAdapterTest.kt": {
+    "mtime": 1778388619.3565557,
+    "hash": "f8c68ab63fb8ff55c16c78897771d0c4"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\test\\kotlin\\com\\charlesluxinger\\estaparking\\infra\\client\\webhook\\WebhookControllerV1IT.kt": {
+    "mtime": 1778386996.4211788,
+    "hash": "f3fee45b7d9d40ba630970bec7987c08"
+  },
   "C:\\Users\\charl\\Projetos\\estaparking\\src\\test\\kotlin\\com\\charlesluxinger\\estaparking\\infra\\persistence\\PersistenceRepositoryIntegrationTest.kt": {
     "mtime": 1778376930.1402802,
     "hash": "46e32ff3133fb9a44026a4262657981b"
+  },
+  "C:\\Users\\charl\\Projetos\\estaparking\\src\\test\\kotlin\\com\\charlesluxinger\\estaparking\\infra\\startup\\StartupGarageSyncConfigTest.kt": {
+    "mtime": 1778384366.413563,
+    "hash": "1f0cf5201272a9e2b12ad54291efb909"
   },
   "C:\\Users\\charl\\Projetos\\estaparking\\AGENTS.md": {
     "mtime": 1778296694.1758363,
