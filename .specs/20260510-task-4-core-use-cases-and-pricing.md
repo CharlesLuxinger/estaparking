@@ -28,16 +28,16 @@ Implement ENTRY, PARKED, pricing rules, and occupancy checks as core application
 3. REFACTOR: extract policy/value objects.
 
 ## Implementation Checklist
-- [ ] Implement `*UseCaseImpl` in `application/service/<feature>/` only.
-- [ ] Encode pricing and occupancy rules as deterministic domain logic.
-- [ ] Enforce full-capacity ENTRY rejection.
-- [ ] Add test matrix for boundary minutes and occupancy percentages.
+- [X] Implement `*UseCaseImpl` in `application/service/<feature>/` only.
+- [X] Encode pricing and occupancy rules as deterministic domain logic.
+- [X] Enforce full-capacity ENTRY rejection.
+- [X] Add test matrix for boundary minutes and occupancy percentages.
 
 ## Acceptance Criteria
-- [ ] Boundary tests pass (30m, 31m, 60m, 61m).
-- [ ] Occupancy bracket tests pass at exact boundaries 25/50/75/100.
-- [ ] Full occupancy blocks new ENTRY.
-- [ ] Domain coverage remains 100%.
+- [X] Boundary tests pass (30m, 31m, 60m, 61m).
+- [X] Occupancy bracket tests pass at exact boundaries 25/50/75/100.
+- [X] Full occupancy blocks new ENTRY.
+- [X] Domain coverage remains 100%.
 
 ## QA Scenarios
 Scenario: occupancy boundary pricing
