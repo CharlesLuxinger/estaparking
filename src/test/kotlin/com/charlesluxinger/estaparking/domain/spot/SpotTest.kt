@@ -1,9 +1,9 @@
 package com.charlesluxinger.estaparking.domain.spot
 
-import com.charlesluxinger.estaparking.domain.error.DomainResult
-import com.charlesluxinger.estaparking.domain.error.DomainResult.Error
 import com.charlesluxinger.estaparking.domain.error.ParkingDomainError
 import com.charlesluxinger.estaparking.domain.event.EventType
+import com.charlesluxinger.estaparking.domain.result.DomainResult.Error
+import com.charlesluxinger.estaparking.domain.result.DomainResult.Success
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -93,20 +93,20 @@ class SpotTest {
         val spot = createAvailableSpot()
 
         val afterEntry = spot.transition(EventType.ENTRY, vehicle)
-        assertTrue(afterEntry is DomainResult.Success)
-        val entrySpot = (afterEntry as DomainResult.Success).value
+        assertTrue(afterEntry is Success)
+        val entrySpot = (afterEntry as Success).value
         assertEquals(SpotStatus.ENTRY_REGISTERED, entrySpot.status)
         assertEquals(vehicle, entrySpot.occupiedBy)
 
         val afterParked = entrySpot.transition(EventType.PARKED, vehicle)
-        assertTrue(afterParked is DomainResult.Success)
-        val parkedSpot = (afterParked as DomainResult.Success).value
+        assertTrue(afterParked is Success)
+        val parkedSpot = (afterParked as Success).value
         assertEquals(SpotStatus.PARKED, parkedSpot.status)
         assertEquals(vehicle, parkedSpot.occupiedBy)
 
         val afterExit = parkedSpot.transition(EventType.EXIT, vehicle)
-        assertTrue(afterExit is DomainResult.Success)
-        val availableSpot = (afterExit as DomainResult.Success).value
+        assertTrue(afterExit is Success)
+        val availableSpot = (afterExit as Success).value
         assertEquals(SpotStatus.AVAILABLE, availableSpot.status)
         assertEquals(null, availableSpot.occupiedBy)
     }
@@ -149,7 +149,7 @@ class SpotTest {
     fun `transition EXIT on ENTRY_REGISTERED returns InvalidExitOrdering error`() {
         val vehicle = Vehicle(plate = "ABC1234")
         val spot = createAvailableSpot()
-        val enteredSpot = (spot.transition(EventType.ENTRY, vehicle) as DomainResult.Success).value
+        val enteredSpot = (spot.transition(EventType.ENTRY, vehicle) as Success).value
 
         val result = enteredSpot.transition(EventType.EXIT, vehicle)
 
@@ -168,7 +168,7 @@ class SpotTest {
         val entryVehicle = Vehicle(plate = "ABC1234")
         val wrongVehicle = Vehicle(plate = "XYZ9876")
         val spot = createAvailableSpot()
-        val enteredSpot = (spot.transition(EventType.ENTRY, entryVehicle) as DomainResult.Success).value
+        val enteredSpot = (spot.transition(EventType.ENTRY, entryVehicle) as Success).value
 
         val result = enteredSpot.transition(EventType.PARKED, wrongVehicle)
 
@@ -188,8 +188,8 @@ class SpotTest {
         val entryVehicle = Vehicle(plate = "ABC1234")
         val wrongVehicle = Vehicle(plate = "XYZ9876")
         val spot = createAvailableSpot()
-        val enteredSpot = (spot.transition(EventType.ENTRY, entryVehicle) as DomainResult.Success).value
-        val parkedSpot = (enteredSpot.transition(EventType.PARKED, entryVehicle) as DomainResult.Success).value
+        val enteredSpot = (spot.transition(EventType.ENTRY, entryVehicle) as Success).value
+        val parkedSpot = (enteredSpot.transition(EventType.PARKED, entryVehicle) as Success).value
 
         val result = parkedSpot.transition(EventType.EXIT, wrongVehicle)
 

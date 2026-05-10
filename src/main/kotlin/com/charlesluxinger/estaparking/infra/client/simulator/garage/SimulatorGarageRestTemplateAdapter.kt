@@ -1,12 +1,13 @@
 package com.charlesluxinger.estaparking.infra.client.simulator.garage
 
-import com.charlesluxinger.estaparking.domain.error.DomainResult
 import com.charlesluxinger.estaparking.domain.port.outbound.SimulatorGarageClientError
 import com.charlesluxinger.estaparking.domain.port.outbound.SimulatorGarageClientError.PayloadMappingFailure
 import com.charlesluxinger.estaparking.domain.port.outbound.SimulatorGarageClientError.TransportFailure
 import com.charlesluxinger.estaparking.domain.port.outbound.SimulatorGarageClientError.UnexpectedStatus
 import com.charlesluxinger.estaparking.domain.port.outbound.SimulatorGarageClientPort
 import com.charlesluxinger.estaparking.domain.port.outbound.dto.SimulatorGarageSnapshot
+import com.charlesluxinger.estaparking.domain.result.DomainResult
+import com.charlesluxinger.estaparking.domain.result.DomainResult.Error
 import com.charlesluxinger.estaparking.infra.client.simulator.garage.dto.SimulatorGarageResponse
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -36,14 +37,14 @@ class SimulatorGarageRestTemplateAdapter(
     private fun ResponseEntity<String>.toDomain(): DomainResult<SimulatorGarageSnapshot, SimulatorGarageClientError> =
         when {
             !statusCode.is2xxSuccessful ->
-                DomainResult.Error(
+                Error(
                     UnexpectedStatus(
                         statusCode = statusCode.value(),
                         responseBody = body.orEmpty(),
                     ),
                 )
 
-            body == null -> DomainResult.Error(PayloadMappingFailure("Empty simulator /garage payload"))
+            body == null -> Error(PayloadMappingFailure("Empty simulator /garage payload"))
 
             else -> {
                 val payload = objectMapper.readValue(body, SimulatorGarageResponse::class.java)
@@ -54,17 +55,17 @@ class SimulatorGarageRestTemplateAdapter(
     private fun Throwable.toDomainResultOrThrow(): DomainResult<SimulatorGarageSnapshot, SimulatorGarageClientError> =
         when (this) {
             is JsonProcessingException,
-            -> DomainResult.Error(PayloadMappingFailure(message ?: "Invalid simulator /garage payload"))
+            -> Error(PayloadMappingFailure(message ?: "Invalid simulator /garage payload"))
 
             is ResourceAccessException,
             is IOException,
-            -> DomainResult.Error(TransportFailure(message ?: "I/O error while calling simulator /garage"))
+            -> Error(TransportFailure(message ?: "I/O error while calling simulator /garage"))
 
             is IllegalArgumentException,
-            -> DomainResult.Error(PayloadMappingFailure(message ?: "Invalid simulator /garage payload"))
+            -> Error(PayloadMappingFailure(message ?: "Invalid simulator /garage payload"))
 
             is RestClientResponseException,
-            -> DomainResult.Error(UnexpectedStatus(statusCode.value(), responseBodyAsString))
+            -> Error(UnexpectedStatus(statusCode.value(), responseBodyAsString))
 
             else -> throw this
         }

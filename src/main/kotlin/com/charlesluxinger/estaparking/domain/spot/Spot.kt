@@ -1,8 +1,14 @@
 package com.charlesluxinger.estaparking.domain.spot
 
-import com.charlesluxinger.estaparking.domain.error.DomainResult
 import com.charlesluxinger.estaparking.domain.error.ParkingDomainError
+import com.charlesluxinger.estaparking.domain.error.ParkingDomainError.ExitBeforeEntry
+import com.charlesluxinger.estaparking.domain.error.ParkingDomainError.InvalidExitOrdering
+import com.charlesluxinger.estaparking.domain.error.ParkingDomainError.InvalidParkedOrdering
+import com.charlesluxinger.estaparking.domain.error.ParkingDomainError.WrongVehicleTransitionAttempt
 import com.charlesluxinger.estaparking.domain.event.EventType
+import com.charlesluxinger.estaparking.domain.result.DomainResult
+import com.charlesluxinger.estaparking.domain.result.DomainResult.Error
+import com.charlesluxinger.estaparking.domain.result.DomainResult.Success
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 
 data class Spot(
@@ -31,22 +37,22 @@ data class Spot(
 
     private fun registerEntry(vehicle: Vehicle): DomainResult<Spot, ParkingDomainError> {
         if (!canAcceptEntry()) {
-            return DomainResult.Error(
-                ParkingDomainError.InvalidParkedOrdering(
+            return Error(
+                InvalidParkedOrdering(
                     spotId = id,
                     currentStatus = status,
                 ),
             )
         }
 
-        return DomainResult.Success(copy(status = SpotStatus.ENTRY_REGISTERED, occupiedBy = vehicle))
+        return Success(copy(status = SpotStatus.ENTRY_REGISTERED, occupiedBy = vehicle))
     }
 
     private fun markParked(vehicle: Vehicle): DomainResult<Spot, ParkingDomainError> =
         when {
             status != SpotStatus.ENTRY_REGISTERED -> {
-                DomainResult.Error(
-                    ParkingDomainError.InvalidParkedOrdering(
+                Error(
+                    InvalidParkedOrdering(
                         spotId = id,
                         currentStatus = status,
                     ),
@@ -54,8 +60,8 @@ data class Spot(
             }
 
             occupiedBy == null || occupiedBy != vehicle -> {
-                DomainResult.Error(
-                    ParkingDomainError.WrongVehicleTransitionAttempt(
+                Error(
+                    WrongVehicleTransitionAttempt(
                         spotId = id,
                         expectedPlate = occupiedBy?.plate ?: "none",
                         attemptedPlate = vehicle.plate,
@@ -63,14 +69,14 @@ data class Spot(
                 )
             }
 
-            else -> DomainResult.Success(copy(status = SpotStatus.PARKED, occupiedBy = vehicle))
+            else -> Success(copy(status = SpotStatus.PARKED, occupiedBy = vehicle))
         }
 
     private fun registerExit(vehicle: Vehicle): DomainResult<Spot, ParkingDomainError> =
         when {
             status == SpotStatus.AVAILABLE -> {
-                DomainResult.Error(
-                    ParkingDomainError.ExitBeforeEntry(
+                Error(
+                    ExitBeforeEntry(
                         spotId = id,
                         currentStatus = status,
                     ),
@@ -78,8 +84,8 @@ data class Spot(
             }
 
             status != SpotStatus.PARKED -> {
-                DomainResult.Error(
-                    ParkingDomainError.InvalidExitOrdering(
+                Error(
+                    InvalidExitOrdering(
                         spotId = id,
                         currentStatus = status,
                     ),
@@ -87,8 +93,8 @@ data class Spot(
             }
 
             occupiedBy == null || occupiedBy != vehicle -> {
-                DomainResult.Error(
-                    ParkingDomainError.WrongVehicleTransitionAttempt(
+                Error(
+                    WrongVehicleTransitionAttempt(
                         spotId = id,
                         expectedPlate = occupiedBy?.plate ?: "none",
                         attemptedPlate = vehicle.plate,
@@ -96,6 +102,6 @@ data class Spot(
                 )
             }
 
-            else -> DomainResult.Success(copy(status = SpotStatus.AVAILABLE, occupiedBy = null))
+            else -> Success(copy(status = SpotStatus.AVAILABLE, occupiedBy = null))
         }
 }
