@@ -8,6 +8,8 @@ import com.charlesluxinger.estaparking.domain.result.DomainResult.Success
 import com.charlesluxinger.estaparking.domain.spot.Spot
 import com.charlesluxinger.estaparking.domain.spot.SpotStatus
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 data class Parking(
     val id: String,
@@ -118,5 +120,17 @@ data class Parking(
                 )
             }
         }
+    }
+
+    fun occupancyPercentage(): BigDecimal {
+        if (this.spots.isEmpty()) {
+            return BigDecimal.ZERO
+        }
+
+        val occupied = this.spots.count(Spot::canAcceptEntry).let { this.spots.size - it }
+        return BigDecimal
+            .valueOf(occupied.toLong())
+            .multiply(BigDecimal("100"))
+            .divide(BigDecimal.valueOf(this.spots.size.toLong()), 2, RoundingMode.HALF_UP)
     }
 }

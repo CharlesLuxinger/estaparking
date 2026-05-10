@@ -24,3 +24,12 @@ fun <T, E, R> DomainResult<T, E>.flatMap(transform: (T) -> DomainResult<R, E>): 
         is Success -> transform(value)
         is Error -> Error(error)
     }
+
+fun <T, E, R> DomainResult<T, E>.fold(
+    onSuccess: (T) -> R,
+    onFailure: (E) -> R,
+): R =
+    when (this) {
+        is Success -> onSuccess(value)
+        is Error -> onFailure(error)
+    }
