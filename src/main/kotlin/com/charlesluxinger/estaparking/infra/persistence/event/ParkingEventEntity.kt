@@ -11,6 +11,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "parking_events")
@@ -27,12 +28,15 @@ class ParkingEventEntity(
     @Enumerated(EnumType.STRING)
     @Column(name = "event_type", nullable = false)
     val eventType: EventType = EventType.ENTRY,
+    @Column(name = "timestamp", nullable = false)
+    val timestamp: LocalDateTime = LocalDateTime.now(),
 ) {
     fun toDomain(): ParkingEvent =
         StoredParkingEvent(
             parkingId = parkingId,
             licensePlate = licensePlate,
             eventType = eventType,
+            timestamp = timestamp,
         )
 
     companion object {
@@ -45,6 +49,7 @@ class ParkingEventEntity(
                 parkingId = domain.parkingId,
                 licensePlate = domain.licensePlate,
                 eventType = domain.eventType,
+                timestamp = domain.timestamp,
             )
     }
 }

@@ -168,11 +168,27 @@ class PersistenceRepositoryIntegrationTest {
 
         parkingSessionJpaAdapter.save(expectedParking)
 
+        val fixedTimestamp = java.time.LocalDateTime.of(2025, 1, 1, 12, 0)
         val savedEvents =
             listOf(
-                StoredParkingEvent(parkingId = parkingId, licensePlate = "ABC1234", eventType = EventType.ENTRY),
-                StoredParkingEvent(parkingId = parkingId, licensePlate = "ABC1234", eventType = EventType.PARKED),
-                StoredParkingEvent(parkingId = parkingId, licensePlate = "ABC1234", eventType = EventType.EXIT),
+                StoredParkingEvent(
+                    parkingId = parkingId,
+                    licensePlate = "ABC1234",
+                    eventType = EventType.ENTRY,
+                    timestamp = fixedTimestamp,
+                ),
+                StoredParkingEvent(
+                    parkingId = parkingId,
+                    licensePlate = "ABC1234",
+                    eventType = EventType.PARKED,
+                    timestamp = fixedTimestamp.plusHours(1),
+                ),
+                StoredParkingEvent(
+                    parkingId = parkingId,
+                    licensePlate = "ABC1234",
+                    eventType = EventType.EXIT,
+                    timestamp = fixedTimestamp.plusHours(2),
+                ),
             ).map(parkingEventJpaAdapter::save)
 
         val reloadedParking = parkingSessionJpaAdapter.findById(parkingId)

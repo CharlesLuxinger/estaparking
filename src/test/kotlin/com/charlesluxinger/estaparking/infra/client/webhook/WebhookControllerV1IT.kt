@@ -105,6 +105,74 @@ class WebhookControllerV1IT {
     }
 
     @Test
+    fun `post webhook with ENTRY and entry_time maps to occuredAt`() {
+        recordingWebhookEventCommandPort.clear()
+
+        mockMvc
+            .perform(
+                post("/webhook")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        "{" +
+                            "\"parking_id\":\"parking-entry-time\"," +
+                            "\"license_plate\":\"ABC1234\"," +
+                            "\"event_type\":\"ENTRY\"," +
+                            "\"entry_time\":\"2025-01-01T10:00:00.000Z\"" +
+                            "}",
+                    ),
+            ).andExpect(status().isOk)
+
+        val command = recordingWebhookEventCommandPort.lastCommand()
+        org.junit.jupiter.api.Assertions
+            .assertNotNull(command.occurredAt)
+    }
+
+    @Test
+    fun `post webhook with EXIT and exit_time maps to occuredAt`() {
+        recordingWebhookEventCommandPort.clear()
+
+        mockMvc
+            .perform(
+                post("/webhook")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        "{" +
+                            "\"parking_id\":\"parking-exit-time\"," +
+                            "\"license_plate\":\"ABC1234\"," +
+                            "\"event_type\":\"EXIT\"," +
+                            "\"exit_time\":\"2025-01-01T12:00:00.000Z\"" +
+                            "}",
+                    ),
+            ).andExpect(status().isOk)
+
+        val command = recordingWebhookEventCommandPort.lastCommand()
+        org.junit.jupiter.api.Assertions
+            .assertNotNull(command.occurredAt)
+    }
+
+    @Test
+    fun `post webhook without timestamp sets occuredAt to null`() {
+        recordingWebhookEventCommandPort.clear()
+
+        mockMvc
+            .perform(
+                post("/webhook")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        "{" +
+                            "\"parking_id\":\"parking-no-time\"," +
+                            "\"license_plate\":\"ABC1234\"," +
+                            "\"event_type\":\"ENTRY\"" +
+                            "}",
+                    ),
+            ).andExpect(status().isOk)
+
+        val command = recordingWebhookEventCommandPort.lastCommand()
+        org.junit.jupiter.api.Assertions
+            .assertNull(command.occurredAt)
+    }
+
+    @Test
     fun `post duplicate ENTRY payload still returns 200`() {
         recordingWebhookEventCommandPort.clear()
         recordingWebhookEventCommandPort.nextOutcome = WebhookEventOutcome.IgnoredDuplicate
