@@ -1,139 +1,136 @@
 package com.charlesluxinger.estaparking.infra.client.revenue
 
-import com.charlesluxinger.estaparking.domain.port.inbound.revenue.RevenueQueryPort
-import com.charlesluxinger.estaparking.domain.port.inbound.revenue.model.RevenueQueryRequest
-import com.charlesluxinger.estaparking.domain.port.inbound.revenue.model.RevenueQueryResponse
+import com.charlesluxinger.estaparking.config.ContainersConfig
+import com.charlesluxinger.estaparking.config.EndpointIntegrationTestBase
+import com.charlesluxinger.estaparking.domain.billing.BillingTransaction
+import com.charlesluxinger.estaparking.infra.persistence.billing.BillingTransactionJpaAdapter
+import com.charlesluxinger.estaparking.infra.persistence.billing.BillingTransactionSpringDataRepository
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Bean
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.context.annotation.Import
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.http.ResponseEntity
+import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
-@WebMvcTest(RevenueControllerV1::class)
-@Import(RevenueControllerV1IT.TestConfig::class)
-class RevenueControllerV1IT {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(EndpointIntegrationTestBase::class, ContainersConfig::class)
+@ActiveProfiles("test")
+class RevenueControllerV1IT : EndpointIntegrationTestBase() {
     @Autowired
-    private lateinit var mockMvc: MockMvc
+    private lateinit var testRestTemplate: TestRestTemplate
 
     @Autowired
-    private lateinit var recordingRevenueQueryPort: RecordingRevenueQueryPort
+    private lateinit var billingTransactionJpaAdapter: BillingTransactionJpaAdapter
+
+    @Autowired
+    private lateinit var billingTransactionSpringDataRepository: BillingTransactionSpringDataRepository
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
+
+    @BeforeEach
+    fun cleanup() {
+        billingTransactionSpringDataRepository.deleteAll()
+    }
 
     @Test
     fun `get revenue with valid request returns 200`() {
-        recordingRevenueQueryPort.nextResponse =
-            RevenueQueryResponse(
+        billingTransactionJpaAdapter.save(
+            BillingTransaction(
+                id = "bt-1",
+                licensePlate = "ABC1234",
+                sector = "A",
                 amount = BigDecimal("100.00"),
-                currency = "BRL",
-                timestamp = LocalDateTime.of(2025, 1, 1, 12, 0),
+                exitTime = LocalDateTime.of(2025, 1, 1, 10, 0),
+                createdAt = LocalDateTime.of(2025, 1, 1, 10, 0),
+            ),
+        )
+
+        val response =
+            executeRevenueRequest(
+                "{" +
+                    "\"date\":\"2025-01-01\"," +
+                    "\"sector\":\"A\"" +
+                    "}",
             )
 
-        mockMvc
-            .perform(
-                get("/revenue")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(
-                        "{" +
-                            "\"date\":\"2025-01-01\"," +
-                            "\"sector\":\"A\"" +
-                            "}",
-                    ),
-            ).andExpect(status().isOk)
-            .andExpect(jsonPath("$.amount").value(100.00))
-            .andExpect(jsonPath("$.currency").value("BRL"))
-            .andExpect(jsonPath("$.timestamp").exists())
+        assertEquals(200, response.statusCode.value())
+        val body = objectMapper.readTree(response.body)
+        assertTrue(body.path("amount").decimalValue().compareTo(BigDecimal("100.00")) == 0)
+        assertEquals("BRL", body.path("currency").asText())
+        assertNotNull(body.path("timestamp").asText().takeIf { it.isNotBlank() })
     }
 
     @Test
     fun `get revenue with missing date returns 400`() {
-        mockMvc
-            .perform(
-                get("/revenue")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(
-                        "{" +
-                            "\"sector\":\"A\"" +
-                            "}",
-                    ),
-            ).andExpect(status().isBadRequest)
+        val response =
+            executeRevenueRequest(
+                "{" +
+                    "\"sector\":\"A\"" +
+                    "}",
+            )
+
+        assertEquals(400, response.statusCode.value())
     }
 
     @Test
     fun `get revenue with missing sector returns 400`() {
-        mockMvc
-            .perform(
-                get("/revenue")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(
-                        "{" +
-                            "\"date\":\"2025-01-01\"" +
-                            "}",
-                    ),
-            ).andExpect(status().isBadRequest)
+        val response =
+            executeRevenueRequest(
+                "{" +
+                    "\"date\":\"2025-01-01\"" +
+                    "}",
+            )
+
+        assertEquals(400, response.statusCode.value())
     }
 
     @Test
     fun `get revenue with empty sector returns 400`() {
-        mockMvc
-            .perform(
-                get("/revenue")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(
-                        "{" +
-                            "\"date\":\"2025-01-01\"," +
-                            "\"sector\":\"\"" +
-                            "}",
-                    ),
-            ).andExpect(status().isBadRequest)
+        val response =
+            executeRevenueRequest(
+                "{" +
+                    "\"date\":\"2025-01-01\"," +
+                    "\"sector\":\"\"" +
+                    "}",
+            )
+
+        assertEquals(400, response.statusCode.value())
     }
 
     @Test
     fun `get revenue returns zero amount when no data`() {
-        recordingRevenueQueryPort.nextResponse =
-            RevenueQueryResponse(
-                amount = BigDecimal.ZERO,
-                currency = "BRL",
-                timestamp = LocalDateTime.of(2025, 1, 1, 12, 0),
+        val response =
+            executeRevenueRequest(
+                "{" +
+                    "\"date\":\"2025-01-01\"," +
+                    "\"sector\":\"A\"" +
+                    "}",
             )
 
-        mockMvc
-            .perform(
-                get("/revenue")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(
-                        "{" +
-                            "\"date\":\"2025-01-01\"," +
-                            "\"sector\":\"A\"" +
-                            "}",
-                    ),
-            ).andExpect(status().isOk)
-            .andExpect(jsonPath("$.amount").value(0))
-            .andExpect(jsonPath("$.currency").value("BRL"))
+        assertEquals(200, response.statusCode.value())
+        val body = objectMapper.readTree(response.body)
+        assertTrue(body.path("amount").decimalValue().compareTo(BigDecimal.ZERO) == 0)
+        assertEquals("BRL", body.path("currency").asText())
     }
 
-    class TestConfig {
-        @Bean
-        fun recordingRevenueQueryPort(): RecordingRevenueQueryPort = RecordingRevenueQueryPort()
+    private fun executeRevenueRequest(requestBody: String): ResponseEntity<String> {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        val request = HttpEntity(requestBody, headers)
 
-        @Bean
-        fun revenueControllerV1(port: RecordingRevenueQueryPort): RevenueControllerV1 = RevenueControllerV1(port)
-    }
-
-    class RecordingRevenueQueryPort : RevenueQueryPort {
-        var nextResponse: RevenueQueryResponse? = null
-
-        override fun getRevenue(request: RevenueQueryRequest): RevenueQueryResponse =
-            nextResponse
-                ?: RevenueQueryResponse(
-                    amount = BigDecimal.ZERO,
-                    currency = "BRL",
-                    timestamp = LocalDateTime.now(),
-                )
+        return testRestTemplate.exchange("/revenue", HttpMethod.GET, request, String::class.java)
     }
 }
