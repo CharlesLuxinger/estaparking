@@ -67,4 +67,52 @@ class BillingRecordTest {
 
         assertEquals("Plate must not be blank", exception.message)
     }
+
+    @Test
+    fun `should fail when sector is blank`() {
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                BillingRecord(
+                    parkingId = "P123",
+                    vehicle = Vehicle("ABC1234"),
+                    sector = "  ",
+                    amount = BigDecimal("10.00"),
+                    parkedMinutes = 60,
+                    billedAt = Instant.now(),
+                )
+            }
+        assertEquals("Sector must not be blank", exception.message)
+    }
+
+    @Test
+    fun `should fail when amount is negative`() {
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                BillingRecord(
+                    parkingId = "P123",
+                    vehicle = Vehicle("ABC1234"),
+                    sector = "A",
+                    amount = BigDecimal("-10.00"),
+                    parkedMinutes = 60,
+                    billedAt = Instant.now(),
+                )
+            }
+        assertEquals("Amount must be non-negative", exception.message)
+    }
+
+    @Test
+    fun `should fail when parkedMinutes is negative`() {
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                BillingRecord(
+                    parkingId = "P123",
+                    vehicle = Vehicle("ABC1234"),
+                    sector = "A",
+                    amount = BigDecimal("10.00"),
+                    parkedMinutes = -10,
+                    billedAt = Instant.now(),
+                )
+            }
+        assertEquals("Parked minutes must be non-negative", exception.message)
+    }
 }

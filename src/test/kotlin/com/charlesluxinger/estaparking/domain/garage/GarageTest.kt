@@ -27,9 +27,16 @@ class GarageTest {
 
     @Test
     fun `constructor with non-positive basePrice throws exception`() {
-        val exception =
+        var exception =
             assertThrows(IllegalArgumentException::class.java) {
                 Garage(sector = "A", basePrice = BigDecimal.ZERO, maxCapacity = 100)
+            }
+
+        assertEquals("Garage base price must be greater than zero", exception.message)
+
+        exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                Garage(sector = "A", basePrice = BigDecimal("-10.0"), maxCapacity = 100)
             }
 
         assertEquals("Garage base price must be greater than zero", exception.message)
@@ -37,9 +44,16 @@ class GarageTest {
 
     @Test
     fun `constructor with non-positive maxCapacity throws exception`() {
-        val exception =
+        var exception =
             assertThrows(IllegalArgumentException::class.java) {
                 Garage(sector = "A", basePrice = BigDecimal("10.0"), maxCapacity = 0)
+            }
+
+        assertEquals("Garage max capacity must be greater than zero", exception.message)
+
+        exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                Garage(sector = "A", basePrice = BigDecimal("10.0"), maxCapacity = -10)
             }
 
         assertEquals("Garage max capacity must be greater than zero", exception.message)

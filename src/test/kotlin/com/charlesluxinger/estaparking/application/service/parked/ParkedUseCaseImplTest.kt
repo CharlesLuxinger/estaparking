@@ -63,4 +63,77 @@ class ParkedUseCaseImplTest {
         assertTrue(result is DomainResult.Error)
         assertTrue((result as DomainResult.Error).error is ParkingDomainError.InvalidParkedOrdering)
     }
+
+    @Test
+    fun `execute returns wrong vehicle transition attempt when different vehicle tries to mark parked`() {
+        val registeredVehicle = Vehicle("FFF6666")
+        val parking =
+            Parking(
+                id = "parking-wrong-vehicle",
+                name = "Wrong Vehicle Parking",
+                spots =
+                    listOf(
+                        Spot(
+                            id = 1L,
+                            sector = "A",
+                            coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63")),
+                            status = SpotStatus.ENTRY_REGISTERED,
+                            occupiedBy = registeredVehicle,
+                        ),
+                    ),
+            )
+
+        val result = useCase.execute(parking, Vehicle("GGG7777"))
+
+        assertTrue(result is DomainResult.Error)
+        assertTrue((result as DomainResult.Error).error is ParkingDomainError.WrongVehicleTransitionAttempt)
+    }
+
+    @Test
+    fun `execute returns invalid parked ordering when spot is already parked`() {
+        val vehicle = Vehicle("HHH8888")
+        val parking =
+            Parking(
+                id = "parking-already-parked",
+                name = "Already Parked Parking",
+                spots =
+                    listOf(
+                        Spot(
+                            id = 1L,
+                            sector = "A",
+                            coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63")),
+                            status = SpotStatus.PARKED,
+                            occupiedBy = vehicle,
+                        ),
+                    ),
+            )
+
+        val result = useCase.execute(parking, vehicle)
+
+        assertTrue(result is DomainResult.Error)
+        assertTrue((result as DomainResult.Error).error is ParkingDomainError.InvalidParkedOrdering)
+    }
+
+    @Test
+    fun `execute with unknown vehicle returns invalid parked ordering for transition`() {
+        val parking =
+            Parking(
+                id = "parking-unknown-vehicle",
+                name = "Unknown Vehicle Parking",
+                spots =
+                    listOf(
+                        Spot(
+                            id = 1L,
+                            sector = "A",
+                            coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63")),
+                            status = SpotStatus.AVAILABLE,
+                        ),
+                    ),
+            )
+
+        val result = useCase.execute(parking, Vehicle("III9999"))
+
+        assertTrue(result is DomainResult.Error)
+        assertTrue((result as DomainResult.Error).error is ParkingDomainError.InvalidParkedOrdering)
+    }
 }
