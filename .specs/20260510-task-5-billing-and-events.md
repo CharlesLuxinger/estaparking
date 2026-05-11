@@ -43,8 +43,8 @@ Scenario: duplicate EXIT
 - Branch: `feat(task-5)-billing-and-events`
 - PR: one PR for this feature.
 - Mandatory PR description:
-  - Must include a clear summary of what was done.
-  - Must include a markdown table with code coverage for all modified files.
+    - Must include a clear summary of what was done.
+    - Must include a markdown table with code coverage for all modified files.
 - Commit: `feat(task-5): billing-and-events`
 
 ## Pre-Commit Checklist (ordered)

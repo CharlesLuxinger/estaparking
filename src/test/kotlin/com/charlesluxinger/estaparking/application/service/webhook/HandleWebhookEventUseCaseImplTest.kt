@@ -3,20 +3,14 @@ package com.charlesluxinger.estaparking.application.service.webhook
 import com.charlesluxinger.estaparking.domain.error.ParkingDomainError
 import com.charlesluxinger.estaparking.domain.event.EventType
 import com.charlesluxinger.estaparking.domain.event.StoredParkingEvent
-import com.charlesluxinger.estaparking.domain.garage.Garage
 import com.charlesluxinger.estaparking.domain.parking.Parking
 import com.charlesluxinger.estaparking.domain.port.inbound.entry.EntryCommandPort
 import com.charlesluxinger.estaparking.domain.port.inbound.parked.ParkedCommandPort
 import com.charlesluxinger.estaparking.domain.port.inbound.webhook.model.WebhookEventCommand
 import com.charlesluxinger.estaparking.domain.port.inbound.webhook.model.WebhookEventOutcome
-import com.charlesluxinger.estaparking.domain.port.outbound.BillingRecordRepositoryPort
-import com.charlesluxinger.estaparking.domain.port.outbound.BillingRepositoryPort
-import com.charlesluxinger.estaparking.domain.port.outbound.LifecycleEventPublisherPort
 import com.charlesluxinger.estaparking.domain.port.outbound.ParkingEventRepositoryPort
 import com.charlesluxinger.estaparking.domain.port.outbound.ParkingSessionRepositoryPort
-import com.charlesluxinger.estaparking.domain.port.outbound.PricingSnapshotRepositoryPort
 import com.charlesluxinger.estaparking.domain.result.DomainResult
-import com.charlesluxinger.estaparking.domain.result.DomainResult.Success
 import com.charlesluxinger.estaparking.domain.spot.Coordinates
 import com.charlesluxinger.estaparking.domain.spot.Spot
 import com.charlesluxinger.estaparking.domain.spot.SpotStatus
@@ -24,41 +18,13 @@ import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.math.BigDecimal
+import java.time.LocalDateTime
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 
 class HandleWebhookEventUseCaseImplTest {
-    private fun createUseCase(
-        parkingSessionRepositoryPort: ParkingSessionRepositoryPort,
-        parkingEventRepositoryPort: ParkingEventRepositoryPort,
-        entryCommandPort: EntryCommandPort,
-        parkedCommandPort: ParkedCommandPort,
-        billingRepositoryPort: BillingRepositoryPort,
-        pricingSnapshotRepositoryPort: PricingSnapshotRepositoryPort,
-        billingRecordRepositoryPort: BillingRecordRepositoryPort,
-        lifecycleEventPublisherPort: LifecycleEventPublisherPort,
-    ): HandleWebhookEventUseCaseImpl =
-        HandleWebhookEventUseCaseImpl(
-            parkingSessionRepositoryPort = parkingSessionRepositoryPort,
-            parkingEventRepositoryPort = parkingEventRepositoryPort,
-            entryCommandPort = entryCommandPort,
-            parkedCommandPort = parkedCommandPort,
-            billingRepositoryPort = billingRepositoryPort,
-            pricingSnapshotRepositoryPort = pricingSnapshotRepositoryPort,
-            billingRecordRepositoryPort = billingRecordRepositoryPort,
-            lifecycleEventPublisherPort = lifecycleEventPublisherPort,
-        )
-
-    private fun mockBillingPorts(): List<Any> =
-        listOf(
-            mockk<BillingRepositoryPort>(relaxed = true),
-            mockk<PricingSnapshotRepositoryPort>(relaxed = true),
-            mockk<BillingRecordRepositoryPort>(relaxed = true),
-            mockk<LifecycleEventPublisherPort>(relaxed = true),
-        )
-
     @Test
     fun `returns not found when parking does not exist`() {
         val parkingId = "missing-parking"
@@ -66,22 +32,15 @@ class HandleWebhookEventUseCaseImplTest {
         val parkingEventRepositoryPort = mockk<ParkingEventRepositoryPort>()
         val entryCommandPort = mockk<EntryCommandPort>()
         val parkedCommandPort = mockk<ParkedCommandPort>()
-        val billingPorts = mockBillingPorts()
-        val billingRepo = billingPorts[0] as BillingRepositoryPort
-        val pricingSnapRepo = billingPorts[1] as PricingSnapshotRepositoryPort
-        val billingRecRepo = billingPorts[2] as BillingRecordRepositoryPort
-        val lifecyclePub = billingPorts[3] as LifecycleEventPublisherPort
 
         val useCase =
-            createUseCase(
-                parkingSessionRepositoryPort,
-                parkingEventRepositoryPort,
-                entryCommandPort,
-                parkedCommandPort,
-                billingRepo,
-                pricingSnapRepo,
-                billingRecRepo,
-                lifecyclePub,
+            HandleWebhookEventUseCaseImpl(
+                parkingSessionRepositoryPort = parkingSessionRepositoryPort,
+                parkingEventRepositoryPort = parkingEventRepositoryPort,
+                entryCommandPort = entryCommandPort,
+                parkedCommandPort = parkedCommandPort,
+                billingTransactionRepositoryPort = mockk(),
+                billingRepositoryPort = mockk(),
             )
 
         every { parkingSessionRepositoryPort.findById(parkingId) } returns null
@@ -90,7 +49,7 @@ class HandleWebhookEventUseCaseImplTest {
             useCase.handle(
                 WebhookEventCommand(
                     parkingId = parkingId,
-                    licensePlate = "ABC1234",
+                    vehicle = Vehicle("ABC1234"),
                     eventType = EventType.ENTRY,
                 ),
             )
@@ -109,33 +68,33 @@ class HandleWebhookEventUseCaseImplTest {
         val parkingEventRepositoryPort = mockk<ParkingEventRepositoryPort>()
         val entryCommandPort = mockk<EntryCommandPort>()
         val parkedCommandPort = mockk<ParkedCommandPort>()
-        val billingPorts = mockBillingPorts()
-        val billingRepo = billingPorts[0] as BillingRepositoryPort
-        val pricingSnapRepo = billingPorts[1] as PricingSnapshotRepositoryPort
-        val billingRecRepo = billingPorts[2] as BillingRecordRepositoryPort
-        val lifecyclePub = billingPorts[3] as LifecycleEventPublisherPort
 
         val useCase =
-            createUseCase(
-                parkingSessionRepositoryPort,
-                parkingEventRepositoryPort,
-                entryCommandPort,
-                parkedCommandPort,
-                billingRepo,
-                pricingSnapRepo,
-                billingRecRepo,
-                lifecyclePub,
+            HandleWebhookEventUseCaseImpl(
+                parkingSessionRepositoryPort = parkingSessionRepositoryPort,
+                parkingEventRepositoryPort = parkingEventRepositoryPort,
+                entryCommandPort = entryCommandPort,
+                parkedCommandPort = parkedCommandPort,
+                billingTransactionRepositoryPort = mockk(),
+                billingRepositoryPort = mockk(),
             )
 
         every { parkingSessionRepositoryPort.findById(parkingId) } returns parkingWithEntryRegistered(plate, parkingId)
         every { parkingEventRepositoryPort.findByParkingId(parkingId) } returns
-            listOf(StoredParkingEvent(parkingId = parkingId, licensePlate = plate, eventType = EventType.ENTRY))
+            listOf(
+                StoredParkingEvent(
+                    parkingId = parkingId,
+                    vehicle = Vehicle(plate),
+                    eventType = EventType.ENTRY,
+                    timestamp = java.time.LocalDateTime.of(2025, 1, 1, 12, 0),
+                ),
+            )
 
         val result =
             useCase.handle(
                 WebhookEventCommand(
                     parkingId = parkingId,
-                    licensePlate = plate,
+                    vehicle = Vehicle(plate),
                     eventType = EventType.ENTRY,
                 ),
             )
@@ -147,66 +106,70 @@ class HandleWebhookEventUseCaseImplTest {
     }
 
     @Test
-    fun `ENTRY after EXIT guard reset`() {
+    fun `ENTRY is processed again after EXIT resets guard`() {
         val parkingId = "parking-reset-after-exit"
         val plate = "ABC1234"
-        val parkingSessionRepositoryPort = mockk<ParkingSessionRepositoryPort>()
-        val parkingEventRepositoryPort = mockk<ParkingEventRepositoryPort>()
-        val entryCommandPort = mockk<EntryCommandPort>()
-        val parkedCommandPort = mockk<ParkedCommandPort>()
-        val billingPorts = mockBillingPorts()
-        val billingRepo = billingPorts[0] as BillingRepositoryPort
-        val pricingSnapRepo = billingPorts[1] as PricingSnapshotRepositoryPort
-        val billingRecRepo = billingPorts[2] as BillingRecordRepositoryPort
-        val lifecyclePub = billingPorts[3] as LifecycleEventPublisherPort
+        val ports = createMockPorts()
+        val useCase = createUseCase(ports)
 
-        val useCase =
-            createUseCase(
-                parkingSessionRepositoryPort,
-                parkingEventRepositoryPort,
-                entryCommandPort,
-                parkedCommandPort,
-                billingRepo,
-                pricingSnapRepo,
-                billingRecRepo,
-                lifecyclePub,
-            )
-
-        every { parkingSessionRepositoryPort.findById(parkingId) } returns parkingWithAvailableSpot(parkingId)
-        every { parkingEventRepositoryPort.findByParkingId(parkingId) } returns
-            listOf(
-                StoredParkingEvent(parkingId = parkingId, licensePlate = plate, eventType = EventType.ENTRY),
-                StoredParkingEvent(parkingId = parkingId, licensePlate = plate, eventType = EventType.PARKED),
-                StoredParkingEvent(parkingId = parkingId, licensePlate = plate, eventType = EventType.EXIT),
-            )
-        every { entryCommandPort.execute(any(), any()) } returns
-            Success(Parking(parkingId, "Test", listOf()))
-        every { parkingSessionRepositoryPort.save(any()) } answers { firstArg() }
-        every { parkingEventRepositoryPort.save(any()) } answers { firstArg() }
-        every { billingRepo.findGarageBySector("A") } returns Garage("A", BigDecimal("10.00"), 100)
+        setupMocksForReentry(ports, parkingId, plate)
 
         val result =
             useCase.handle(
                 WebhookEventCommand(
                     parkingId = parkingId,
-                    licensePlate = plate,
+                    vehicle = Vehicle(plate),
                     eventType = EventType.ENTRY,
                 ),
             )
 
         assertEquals(WebhookEventOutcome.Processed, result)
 
-        verify(exactly = 1) { parkingSessionRepositoryPort.save(any()) }
-        verify(exactly = 1) { entryCommandPort.execute(any(), Vehicle(plate)) }
+        verify(exactly = 1) { ports.parkingSessionRepositoryPort.save(any()) }
+        verify(exactly = 1) { ports.entryCommandPort.execute(any(), Vehicle(plate)) }
         verify(exactly = 1) {
-            parkingEventRepositoryPort.save(
-                StoredParkingEvent(
-                    parkingId = parkingId,
-                    licensePlate = plate,
-                    eventType = EventType.ENTRY,
-                ),
+            ports.parkingEventRepositoryPort.save(
+                match {
+                    it.parkingId == parkingId &&
+                        it.vehicle.plate == plate &&
+                        it.eventType == EventType.ENTRY
+                },
             )
         }
+    }
+
+    private fun setupMocksForReentry(
+        ports: MockPorts,
+        parkingId: String,
+        plate: String,
+    ) {
+        every { ports.parkingSessionRepositoryPort.findById(parkingId) } returns parkingWithAvailableSpot(parkingId)
+        every { ports.parkingEventRepositoryPort.findByParkingId(parkingId) } returns
+            listOf(
+                StoredParkingEvent(
+                    parkingId = parkingId,
+                    vehicle = Vehicle(plate),
+                    eventType = EventType.ENTRY,
+                    timestamp = LocalDateTime.of(2025, 1, 1, 12, 0),
+                ),
+                StoredParkingEvent(
+                    parkingId = parkingId,
+                    vehicle = Vehicle(plate),
+                    eventType = EventType.PARKED,
+                    timestamp = LocalDateTime.of(2025, 1, 1, 13, 0),
+                ),
+                StoredParkingEvent(
+                    parkingId = parkingId,
+                    vehicle = Vehicle(plate),
+                    eventType = EventType.EXIT,
+                    timestamp = LocalDateTime.of(2025, 1, 1, 14, 0),
+                ),
+            )
+        every { ports.entryCommandPort.execute(any(), Vehicle(plate)) } answers {
+            firstArg<Parking>().apply(EventType.ENTRY, Vehicle(plate))
+        }
+        every { ports.parkingSessionRepositoryPort.save(any()) } answers { firstArg() }
+        every { ports.parkingEventRepositoryPort.save(any()) } answers { firstArg() }
     }
 
     @Test
@@ -217,33 +180,33 @@ class HandleWebhookEventUseCaseImplTest {
         val parkingEventRepositoryPort = mockk<ParkingEventRepositoryPort>()
         val entryCommandPort = mockk<EntryCommandPort>()
         val parkedCommandPort = mockk<ParkedCommandPort>()
-        val billingPorts = mockBillingPorts()
-        val billingRepo = billingPorts[0] as BillingRepositoryPort
-        val pricingSnapRepo = billingPorts[1] as PricingSnapshotRepositoryPort
-        val billingRecRepo = billingPorts[2] as BillingRecordRepositoryPort
-        val lifecyclePub = billingPorts[3] as LifecycleEventPublisherPort
 
         val useCase =
-            createUseCase(
-                parkingSessionRepositoryPort,
-                parkingEventRepositoryPort,
-                entryCommandPort,
-                parkedCommandPort,
-                billingRepo,
-                pricingSnapRepo,
-                billingRecRepo,
-                lifecyclePub,
+            HandleWebhookEventUseCaseImpl(
+                parkingSessionRepositoryPort = parkingSessionRepositoryPort,
+                parkingEventRepositoryPort = parkingEventRepositoryPort,
+                entryCommandPort = entryCommandPort,
+                parkedCommandPort = parkedCommandPort,
+                billingTransactionRepositoryPort = mockk(),
+                billingRepositoryPort = mockk(),
             )
 
         every { parkingSessionRepositoryPort.findById(parkingId) } returns parkingWithEntryRegistered(plate, parkingId)
         every { parkingEventRepositoryPort.findByParkingId(parkingId) } returns
-            listOf(StoredParkingEvent(parkingId = parkingId, licensePlate = plate, eventType = EventType.ENTRY))
+            listOf(
+                StoredParkingEvent(
+                    parkingId = parkingId,
+                    vehicle = Vehicle(plate),
+                    eventType = EventType.ENTRY,
+                    timestamp = java.time.LocalDateTime.of(2025, 1, 1, 12, 0),
+                ),
+            )
 
         val result =
             useCase.handle(
                 WebhookEventCommand(
                     parkingId = parkingId,
-                    licensePlate = plate,
+                    vehicle = Vehicle(plate),
                     eventType = EventType.ENTRY,
                 ),
             )
@@ -263,22 +226,15 @@ class HandleWebhookEventUseCaseImplTest {
         val parkingEventRepositoryPort = mockk<ParkingEventRepositoryPort>()
         val entryCommandPort = mockk<EntryCommandPort>()
         val parkedCommandPort = mockk<ParkedCommandPort>()
-        val billingPorts = mockBillingPorts()
-        val billingRepo = billingPorts[0] as BillingRepositoryPort
-        val pricingSnapRepo = billingPorts[1] as PricingSnapshotRepositoryPort
-        val billingRecRepo = billingPorts[2] as BillingRecordRepositoryPort
-        val lifecyclePub = billingPorts[3] as LifecycleEventPublisherPort
 
         val useCase =
-            createUseCase(
-                parkingSessionRepositoryPort,
-                parkingEventRepositoryPort,
-                entryCommandPort,
-                parkedCommandPort,
-                billingRepo,
-                pricingSnapRepo,
-                billingRecRepo,
-                lifecyclePub,
+            HandleWebhookEventUseCaseImpl(
+                parkingSessionRepositoryPort = parkingSessionRepositoryPort,
+                parkingEventRepositoryPort = parkingEventRepositoryPort,
+                entryCommandPort = entryCommandPort,
+                parkedCommandPort = parkedCommandPort,
+                billingTransactionRepositoryPort = mockk(),
+                billingRepositoryPort = mockk(),
             )
 
         every { parkingSessionRepositoryPort.findById(parkingId) } returns parkingWithAvailableSpot(parkingId)
@@ -295,7 +251,7 @@ class HandleWebhookEventUseCaseImplTest {
             useCase.handle(
                 WebhookEventCommand(
                     parkingId = parkingId,
-                    licensePlate = "ABC1234",
+                    vehicle = Vehicle("ABC1234"),
                     eventType = EventType.PARKED,
                 ),
             )
@@ -339,5 +295,30 @@ class HandleWebhookEventUseCaseImplTest {
                         occupiedBy = Vehicle(plate),
                     ),
                 ),
+        )
+
+    private fun createMockPorts() =
+        MockPorts(
+            parkingSessionRepositoryPort = mockk(),
+            parkingEventRepositoryPort = mockk(),
+            entryCommandPort = mockk(),
+            parkedCommandPort = mockk(),
+        )
+
+    private data class MockPorts(
+        val parkingSessionRepositoryPort: ParkingSessionRepositoryPort,
+        val parkingEventRepositoryPort: ParkingEventRepositoryPort,
+        val entryCommandPort: EntryCommandPort,
+        val parkedCommandPort: ParkedCommandPort,
+    )
+
+    private fun createUseCase(ports: MockPorts): HandleWebhookEventUseCaseImpl =
+        HandleWebhookEventUseCaseImpl(
+            parkingSessionRepositoryPort = ports.parkingSessionRepositoryPort,
+            parkingEventRepositoryPort = ports.parkingEventRepositoryPort,
+            entryCommandPort = ports.entryCommandPort,
+            parkedCommandPort = ports.parkedCommandPort,
+            billingTransactionRepositoryPort = mockk(),
+            billingRepositoryPort = mockk(),
         )
 }

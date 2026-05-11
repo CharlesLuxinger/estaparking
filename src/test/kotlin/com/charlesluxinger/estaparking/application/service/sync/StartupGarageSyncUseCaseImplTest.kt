@@ -14,10 +14,10 @@ import com.charlesluxinger.estaparking.domain.spot.Spot
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.math.BigDecimal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 
 class StartupGarageSyncUseCaseImplTest {
     @Test

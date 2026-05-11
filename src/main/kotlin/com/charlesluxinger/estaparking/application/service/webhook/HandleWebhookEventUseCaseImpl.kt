@@ -1,173 +1,143 @@
 package com.charlesluxinger.estaparking.application.service.webhook
 
-import com.charlesluxinger.estaparking.domain.billing.BillingRecord
-import com.charlesluxinger.estaparking.domain.billing.PricingSnapshot
+import com.charlesluxinger.estaparking.domain.billing.BillingTransaction
 import com.charlesluxinger.estaparking.domain.event.EventType
-import com.charlesluxinger.estaparking.domain.event.PublishedLifecycleEvent
 import com.charlesluxinger.estaparking.domain.event.StoredParkingEvent
-import com.charlesluxinger.estaparking.domain.parking.Parking
 import com.charlesluxinger.estaparking.domain.port.inbound.entry.EntryCommandPort
 import com.charlesluxinger.estaparking.domain.port.inbound.parked.ParkedCommandPort
 import com.charlesluxinger.estaparking.domain.port.inbound.webhook.WebhookEventCommandPort
 import com.charlesluxinger.estaparking.domain.port.inbound.webhook.model.WebhookEventCommand
 import com.charlesluxinger.estaparking.domain.port.inbound.webhook.model.WebhookEventOutcome
-import com.charlesluxinger.estaparking.domain.port.outbound.BillingRecordRepositoryPort
 import com.charlesluxinger.estaparking.domain.port.outbound.BillingRepositoryPort
-import com.charlesluxinger.estaparking.domain.port.outbound.LifecycleEventPublisherPort
+import com.charlesluxinger.estaparking.domain.port.outbound.BillingTransactionRepositoryPort
 import com.charlesluxinger.estaparking.domain.port.outbound.ParkingEventRepositoryPort
 import com.charlesluxinger.estaparking.domain.port.outbound.ParkingSessionRepositoryPort
-import com.charlesluxinger.estaparking.domain.port.outbound.PricingSnapshotRepositoryPort
 import com.charlesluxinger.estaparking.domain.pricing.PricingPolicy
-import com.charlesluxinger.estaparking.domain.result.fold
-import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
+import com.charlesluxinger.estaparking.domain.result.DomainResult
 import java.math.BigDecimal
-import java.math.RoundingMode
-import java.time.Clock
 import java.time.Duration
-import java.time.Instant
+import java.time.LocalDateTime
+import java.util.UUID
 
 class HandleWebhookEventUseCaseImpl(
     private val parkingSessionRepositoryPort: ParkingSessionRepositoryPort,
     private val parkingEventRepositoryPort: ParkingEventRepositoryPort,
     private val entryCommandPort: EntryCommandPort,
     private val parkedCommandPort: ParkedCommandPort,
+    private val billingTransactionRepositoryPort: BillingTransactionRepositoryPort,
     private val billingRepositoryPort: BillingRepositoryPort,
-    private val pricingSnapshotRepositoryPort: PricingSnapshotRepositoryPort,
-    private val billingRecordRepositoryPort: BillingRecordRepositoryPort,
-    private val lifecycleEventPublisherPort: LifecycleEventPublisherPort,
-    private val clock: Clock = Clock.systemUTC(),
 ) : WebhookEventCommandPort {
-    companion object {
-        private const val FREE_PARKING_MINUTES = 30
-        private const val MINUTES_PER_HOUR = 60
-    }
-
     override fun handle(command: WebhookEventCommand): WebhookEventOutcome {
         val currentParking =
             parkingSessionRepositoryPort.findById(command.parkingId)
                 ?: return WebhookEventOutcome.NotFound
 
-        return when {
-            isDuplicateForActiveSession(command) -> WebhookEventOutcome.IgnoredDuplicate
-            else -> processEventTransition(currentParking, command)
-        }
-    }
-
-    private fun processEventTransition(
-        currentParking: Parking,
-        command: WebhookEventCommand,
-    ): WebhookEventOutcome {
-        val vehicle = Vehicle(command.licensePlate)
-        val transitionResult =
-            when (command.eventType) {
-                EventType.ENTRY -> entryCommandPort.execute(currentParking, vehicle)
-                EventType.PARKED -> parkedCommandPort.execute(currentParking, vehicle)
-                EventType.EXIT -> currentParking.apply(eventType = EventType.EXIT, vehicle = vehicle)
-            }
-
-        return transitionResult.fold(
-            onSuccess = { updatedParking -> processSuccessfulTransition(updatedParking, command) },
-            onFailure = { error -> WebhookEventOutcome.RejectedTransition(error) },
-        )
-    }
-
-    private fun processSuccessfulTransition(
-        updatedParking: Parking,
-        command: WebhookEventCommand,
-    ): WebhookEventOutcome {
-        val occurredAt = Instant.now(clock)
-
-        parkingSessionRepositoryPort.save(updatedParking)
-        parkingEventRepositoryPort.save(
-            StoredParkingEvent(
-                parkingId = command.parkingId,
-                licensePlate = command.licensePlate,
-                eventType = command.eventType,
-            ),
-        )
-
-        when (command.eventType) {
-            EventType.ENTRY -> storePricingSnapshot(updatedParking, command, occurredAt)
-            EventType.EXIT -> createBillingRecord(command, occurredAt)
-            EventType.PARKED -> Unit
-        }
-
-        lifecycleEventPublisherPort.publish(
-            PublishedLifecycleEvent(
-                parkingId = command.parkingId,
-                licensePlate = command.licensePlate,
-                eventType = command.eventType,
-                occurredAt = occurredAt,
-            ),
-        )
-
-        return WebhookEventOutcome.Processed
-    }
-
-    private fun storePricingSnapshot(
-        updatedParking: Parking,
-        command: WebhookEventCommand,
-        occurredAt: Instant,
-    ) {
-        val assignedSpot = updatedParking.spots.firstOrNull { it.occupiedBy?.plate == command.licensePlate } ?: return
-        val garage = billingRepositoryPort.findGarageBySector(assignedSpot.sector) ?: return
-        val occupancy = updatedParking.occupancyPercentage()
-
-        pricingSnapshotRepositoryPort.save(
-            PricingSnapshot(
-                parkingId = command.parkingId,
-                licensePlate = command.licensePlate,
-                sector = assignedSpot.sector,
-                basePrice = garage.basePrice,
-                occupancyPercentageAtEntry = occupancy,
-                multiplierAtEntry = PricingPolicy.occupancyMultiplier(occupancy),
-                entryAt = occurredAt,
-            ),
-        )
-    }
-
-    private fun createBillingRecord(
-        command: WebhookEventCommand,
-        occurredAt: Instant,
-    ) {
-        val snapshot =
-            pricingSnapshotRepositoryPort.findLatestByParkingIdAndLicensePlate(
-                parkingId = command.parkingId,
-                licensePlate = command.licensePlate,
-            ) ?: return
-
-        val parkedMinutes = Duration.between(snapshot.entryAt, occurredAt).toMinutes().coerceAtLeast(0)
-        val billedHours =
-            if (parkedMinutes <= FREE_PARKING_MINUTES) {
-                BigDecimal.ZERO
+        val outcome =
+            if (isDuplicateForActiveSession(command)) {
+                WebhookEventOutcome.IgnoredDuplicate
             } else {
-                BigDecimal
-                    .valueOf(parkedMinutes)
-                    .divide(BigDecimal(MINUTES_PER_HOUR), 0, RoundingMode.CEILING)
-            }
-        val amount =
-            snapshot.basePrice
-                .multiply(billedHours)
-                .multiply(snapshot.multiplierAtEntry)
-                .setScale(2, RoundingMode.HALF_UP)
+                val vehicle = command.vehicle
+                val transitionResult =
+                    when (command.eventType) {
+                        EventType.ENTRY -> entryCommandPort.execute(currentParking, vehicle)
+                        EventType.PARKED -> parkedCommandPort.execute(currentParking, vehicle)
+                        EventType.EXIT -> currentParking.apply(eventType = EventType.EXIT, vehicle = vehicle)
+                    }
 
-        billingRecordRepositoryPort.save(
-            BillingRecord(
-                parkingId = command.parkingId,
-                licensePlate = command.licensePlate,
-                sector = snapshot.sector,
-                amount = amount,
+                when (transitionResult) {
+                    is DomainResult.Success -> {
+                        val timestamp = command.occurredAt ?: LocalDateTime.now()
+
+                        parkingSessionRepositoryPort.save(transitionResult.value)
+                        parkingEventRepositoryPort.save(
+                            StoredParkingEvent(
+                                parkingId = command.parkingId,
+                                vehicle = command.vehicle,
+                                eventType = command.eventType,
+                                timestamp = timestamp,
+                            ),
+                        )
+
+                        if (command.eventType == EventType.EXIT && command.occurredAt != null) {
+                            saveBillingTransaction(command, currentParking, timestamp)
+                        }
+
+                        WebhookEventOutcome.Processed
+                    }
+
+                    is DomainResult.Error -> WebhookEventOutcome.RejectedTransition(transitionResult.error)
+                }
+            }
+
+        return outcome
+    }
+
+    private fun saveBillingTransaction(
+        command: WebhookEventCommand,
+        currentParking: com.charlesluxinger.estaparking.domain.parking.Parking,
+        exitTime: LocalDateTime,
+    ) {
+        val sector = findSectorForVehicle(currentParking, command.vehicle.plate)
+        val entryTime = findLastEntryTime(command.parkingId, command.vehicle.plate)
+        val garage = sector?.let { billingRepositoryPort.findGarageBySector(it) }
+
+        if (sector == null || entryTime == null || garage == null) {
+            return
+        }
+
+        val parkedMinutes = Duration.between(entryTime, exitTime).toMinutes()
+        val occupancyPercentage = calculateOccupancy(currentParking)
+
+        val amount =
+            PricingPolicy.calculateAmount(
+                basePrice = garage.basePrice,
                 parkedMinutes = parkedMinutes,
-                billedAt = occurredAt,
-            ),
-        )
+                occupancyPercentage = occupancyPercentage,
+            )
+
+        val billingTransaction =
+            BillingTransaction(
+                id = UUID.randomUUID().toString(),
+                vehicle = command.vehicle,
+                sector = sector,
+                amount = amount,
+                exitTime = exitTime,
+                createdAt = LocalDateTime.now(),
+            )
+
+        billingTransactionRepositoryPort.save(billingTransaction)
+    }
+
+    private fun findSectorForVehicle(
+        parking: com.charlesluxinger.estaparking.domain.parking.Parking,
+        licensePlate: String,
+    ): String? = parking.spots.find { it.occupiedBy?.plate == licensePlate }?.sector
+
+    private fun findLastEntryTime(
+        parkingId: String,
+        licensePlate: String,
+    ): LocalDateTime? {
+        val events =
+            parkingEventRepositoryPort
+                .findByParkingId(parkingId)
+                .filter { it.vehicle.plate == licensePlate && it.eventType == EventType.ENTRY }
+                .sortedByDescending { it.timestamp }
+        return events.firstOrNull()?.timestamp
+    }
+
+    private fun calculateOccupancy(parking: com.charlesluxinger.estaparking.domain.parking.Parking): BigDecimal {
+        val totalSpots = parking.spots.size
+        if (totalSpots == 0) return BigDecimal.ZERO
+
+        val occupiedSpots = parking.spots.count { it.occupiedBy != null }
+        return (occupiedSpots.toBigDecimal() * BigDecimal("100")) / totalSpots.toBigDecimal()
     }
 
     private fun isDuplicateForActiveSession(command: WebhookEventCommand): Boolean {
         val eventsByVehicle =
             parkingEventRepositoryPort
                 .findByParkingId(command.parkingId)
-                .filter { it.licensePlate == command.licensePlate }
+                .filter { it.vehicle.plate == command.vehicle.plate }
 
         if (eventsByVehicle.isEmpty()) {
             return false

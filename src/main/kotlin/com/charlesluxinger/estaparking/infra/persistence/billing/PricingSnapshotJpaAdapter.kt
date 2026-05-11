@@ -2,6 +2,7 @@ package com.charlesluxinger.estaparking.infra.persistence.billing
 
 import com.charlesluxinger.estaparking.domain.billing.PricingSnapshot
 import com.charlesluxinger.estaparking.domain.port.outbound.PricingSnapshotRepositoryPort
+import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -13,11 +14,11 @@ class PricingSnapshotJpaAdapter(
 
     override fun findLatestByParkingIdAndLicensePlate(
         parkingId: String,
-        licensePlate: String,
+        vehicle: Vehicle,
     ): PricingSnapshot? =
         repository
             .findTopByParkingIdAndLicensePlateOrderByEntryAtDesc(
                 parkingId = parkingId,
-                licensePlate = licensePlate,
+                licensePlate = vehicle.plate,
             )?.toDomain()
 }

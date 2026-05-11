@@ -5,12 +5,12 @@ import com.charlesluxinger.estaparking.domain.event.EventType
 import com.charlesluxinger.estaparking.domain.result.DomainResult.Error
 import com.charlesluxinger.estaparking.domain.result.DomainResult.Success
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
+import java.math.BigDecimal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 
 class SpotTest {
     @Test

@@ -2,6 +2,7 @@ package com.charlesluxinger.estaparking.infra.persistence.billing
 
 import com.charlesluxinger.estaparking.domain.billing.BillingRecord
 import com.charlesluxinger.estaparking.domain.port.outbound.BillingRecordRepositoryPort
+import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -13,11 +14,11 @@ class BillingRecordJpaAdapter(
 
     override fun findByParkingIdAndLicensePlate(
         parkingId: String,
-        licensePlate: String,
+        vehicle: Vehicle,
     ): List<BillingRecord> =
         repository
             .findByParkingIdAndLicensePlateOrderByIdAsc(
                 parkingId = parkingId,
-                licensePlate = licensePlate,
+                licensePlate = vehicle.plate,
             ).map(BillingRecordEntity::toDomain)
 }

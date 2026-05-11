@@ -1,10 +1,10 @@
 package com.charlesluxinger.estaparking.domain.spot
 
+import java.math.BigDecimal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 
 class CoordinatesTest {
     @Test
