@@ -17,17 +17,17 @@ Add comprehensive test suites and resilience hardening while preserving simplici
 Use RED-GREEN-REFACTOR for each hardening rule added.
 
 ## Implementation Checklist
-- [ ] Expand domain/application edge-case test matrix.
-- [ ] Add webhook malformed payload tests.
-- [ ] Add concurrency scenario for near-full/full occupancy ENTRY handling.
-- [ ] Confirm ArchUnit checks cover new packages.
-- [ ] Validate logging correlation behavior tests where feasible.
+- [X] Expand domain/application edge-case test matrix.
+- [X] Add webhook malformed payload tests.
+- [X] Add concurrency scenario for near-full/full occupancy ENTRY handling.
+- [X] Confirm ArchUnit checks cover new packages.
+- [X] Validate logging correlation behavior tests where feasible.
 
 ## Acceptance Criteria
-- [ ] Core rules have happy + failure coverage.
-- [ ] Domain coverage remains 100%.
-- [ ] CI quality gates remain green.
-- [ ] No architectural boundary regressions.
+- [X] Core rules have happy + failure coverage.
+- [X] Domain coverage remains 100%.
+- [X] CI quality gates remain green.
+- [X] No architectural boundary regressions.
 
 ## QA Scenarios
 Scenario: concurrent ENTRY at limit
