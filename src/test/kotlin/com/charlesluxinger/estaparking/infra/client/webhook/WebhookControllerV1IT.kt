@@ -91,7 +91,7 @@ class WebhookControllerV1IT : EndpointIntegrationTestBase() {
 
         val command = spyWebhookEventCommandPort.lastCommand()
         assertEquals("parking-entry", command.parkingId)
-        assertEquals("ABC1234", command.licensePlate)
+        assertEquals("ABC1234", command.vehicle.plate)
         assertEquals(EventType.ENTRY, command.eventType)
     }
 
@@ -103,7 +103,7 @@ class WebhookControllerV1IT : EndpointIntegrationTestBase() {
 
         val command = spyWebhookEventCommandPort.lastCommand()
         assertEquals("parking-parked", command.parkingId)
-        assertEquals("ABC1234", command.licensePlate)
+        assertEquals("ABC1234", command.vehicle.plate)
         assertEquals(EventType.PARKED, command.eventType)
     }
 
@@ -115,7 +115,7 @@ class WebhookControllerV1IT : EndpointIntegrationTestBase() {
 
         val command = spyWebhookEventCommandPort.lastCommand()
         assertEquals("parking-exit", command.parkingId)
-        assertEquals("ABC1234", command.licensePlate)
+        assertEquals("ABC1234", command.vehicle.plate)
         assertEquals(EventType.EXIT, command.eventType)
     }
 

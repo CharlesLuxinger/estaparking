@@ -1,8 +1,8 @@
 package com.charlesluxinger.estaparking.domain.pricing
 
+import java.math.BigDecimal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 
 class PricingPolicyTest {
     @Test

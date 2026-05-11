@@ -3,6 +3,7 @@ package com.charlesluxinger.estaparking.infra.persistence.event
 import com.charlesluxinger.estaparking.domain.event.EventType
 import com.charlesluxinger.estaparking.domain.event.ParkingEvent
 import com.charlesluxinger.estaparking.domain.event.StoredParkingEvent
+import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -34,7 +35,7 @@ class ParkingEventEntity(
     fun toDomain(): ParkingEvent =
         StoredParkingEvent(
             parkingId = parkingId,
-            licensePlate = licensePlate,
+            vehicle = Vehicle(licensePlate),
             eventType = eventType,
             timestamp = timestamp,
         )
@@ -47,7 +48,7 @@ class ParkingEventEntity(
             ParkingEventEntity(
                 eventId = eventId,
                 parkingId = domain.parkingId,
-                licensePlate = domain.licensePlate,
+                licensePlate = domain.vehicle.plate,
                 eventType = domain.eventType,
                 timestamp = domain.timestamp,
             )

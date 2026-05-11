@@ -11,6 +11,7 @@ import com.charlesluxinger.estaparking.domain.result.DomainResult.Error
 import com.charlesluxinger.estaparking.infra.client.simulator.garage.dto.SimulatorGarageResponse
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
+import java.io.IOException
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Repository
 import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
-import java.io.IOException
 
 @Repository
 class SimulatorGarageRestTemplateAdapter(

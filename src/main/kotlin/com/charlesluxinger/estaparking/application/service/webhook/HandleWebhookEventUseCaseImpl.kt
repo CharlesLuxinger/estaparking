@@ -14,7 +14,6 @@ import com.charlesluxinger.estaparking.domain.port.outbound.ParkingEventReposito
 import com.charlesluxinger.estaparking.domain.port.outbound.ParkingSessionRepositoryPort
 import com.charlesluxinger.estaparking.domain.pricing.PricingPolicy
 import com.charlesluxinger.estaparking.domain.result.DomainResult
-import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 import java.math.BigDecimal
 import java.time.Duration
 import java.time.LocalDateTime
@@ -37,7 +36,7 @@ class HandleWebhookEventUseCaseImpl(
             if (isDuplicateForActiveSession(command)) {
                 WebhookEventOutcome.IgnoredDuplicate
             } else {
-                val vehicle = Vehicle(command.licensePlate)
+                val vehicle = command.vehicle
                 val transitionResult =
                     when (command.eventType) {
                         EventType.ENTRY -> entryCommandPort.execute(currentParking, vehicle)
@@ -53,7 +52,7 @@ class HandleWebhookEventUseCaseImpl(
                         parkingEventRepositoryPort.save(
                             StoredParkingEvent(
                                 parkingId = command.parkingId,
-                                licensePlate = command.licensePlate,
+                                vehicle = command.vehicle,
                                 eventType = command.eventType,
                                 timestamp = timestamp,
                             ),
@@ -78,8 +77,8 @@ class HandleWebhookEventUseCaseImpl(
         currentParking: com.charlesluxinger.estaparking.domain.parking.Parking,
         exitTime: LocalDateTime,
     ) {
-        val sector = findSectorForVehicle(currentParking, command.licensePlate)
-        val entryTime = findLastEntryTime(command.parkingId, command.licensePlate)
+        val sector = findSectorForVehicle(currentParking, command.vehicle.plate)
+        val entryTime = findLastEntryTime(command.parkingId, command.vehicle.plate)
         val garage = sector?.let { billingRepositoryPort.findGarageBySector(it) }
 
         if (sector == null || entryTime == null || garage == null) {
@@ -99,7 +98,7 @@ class HandleWebhookEventUseCaseImpl(
         val billingTransaction =
             BillingTransaction(
                 id = UUID.randomUUID().toString(),
-                licensePlate = command.licensePlate,
+                vehicle = command.vehicle,
                 sector = sector,
                 amount = amount,
                 exitTime = exitTime,
@@ -121,7 +120,7 @@ class HandleWebhookEventUseCaseImpl(
         val events =
             parkingEventRepositoryPort
                 .findByParkingId(parkingId)
-                .filter { it.licensePlate == licensePlate && it.eventType == EventType.ENTRY }
+                .filter { it.vehicle.plate == licensePlate && it.eventType == EventType.ENTRY }
                 .sortedByDescending { it.timestamp }
         return events.firstOrNull()?.timestamp
     }
@@ -138,7 +137,7 @@ class HandleWebhookEventUseCaseImpl(
         val eventsByVehicle =
             parkingEventRepositoryPort
                 .findByParkingId(command.parkingId)
-                .filter { it.licensePlate == command.licensePlate }
+                .filter { it.vehicle.plate == command.vehicle.plate }
 
         if (eventsByVehicle.isEmpty()) {
             return false

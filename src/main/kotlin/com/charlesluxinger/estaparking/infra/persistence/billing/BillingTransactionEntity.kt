@@ -1,6 +1,7 @@
 package com.charlesluxinger.estaparking.infra.persistence.billing
 
 import com.charlesluxinger.estaparking.domain.billing.BillingTransaction
+import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -32,7 +33,7 @@ class BillingTransactionEntity(
     fun toDomain(): BillingTransaction =
         BillingTransaction(
             id = billingId,
-            licensePlate = licensePlate,
+            vehicle = Vehicle(licensePlate),
             sector = sector,
             amount = amount,
             exitTime = exitTime,
@@ -43,7 +44,7 @@ class BillingTransactionEntity(
         fun fromDomain(domain: BillingTransaction): BillingTransactionEntity =
             BillingTransactionEntity(
                 billingId = domain.id,
-                licensePlate = domain.licensePlate,
+                licensePlate = domain.vehicle.plate,
                 sector = domain.sector,
                 amount = domain.amount,
                 exitTime = domain.exitTime,

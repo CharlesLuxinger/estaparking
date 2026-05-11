@@ -1,6 +1,7 @@
 package com.charlesluxinger.estaparking.infra.persistence.billing
 
 import com.charlesluxinger.estaparking.domain.billing.PricingSnapshot
+import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -34,7 +35,7 @@ class PricingSnapshotEntity(
     fun toDomain(): PricingSnapshot =
         PricingSnapshot(
             parkingId = parkingId,
-            licensePlate = licensePlate,
+            vehicle = Vehicle(licensePlate),
             sector = sector,
             basePrice = basePrice,
             occupancyPercentageAtEntry = occupancyPercentageAtEntry,
@@ -46,7 +47,7 @@ class PricingSnapshotEntity(
         fun fromDomain(domain: PricingSnapshot): PricingSnapshotEntity =
             PricingSnapshotEntity(
                 parkingId = domain.parkingId,
-                licensePlate = domain.licensePlate,
+                licensePlate = domain.vehicle.plate,
                 sector = domain.sector,
                 basePrice = domain.basePrice,
                 occupancyPercentageAtEntry = domain.occupancyPercentageAtEntry,

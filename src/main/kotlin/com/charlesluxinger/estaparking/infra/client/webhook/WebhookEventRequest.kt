@@ -2,6 +2,7 @@ package com.charlesluxinger.estaparking.infra.client.webhook
 
 import com.charlesluxinger.estaparking.domain.event.EventType
 import com.charlesluxinger.estaparking.domain.port.inbound.webhook.model.WebhookEventCommand
+import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime
 
@@ -24,6 +25,6 @@ data class WebhookEventRequest(
                 EventType.EXIT -> exitTime
                 EventType.PARKED -> null
             }
-        return WebhookEventCommand(parkingId, licensePlate, eventType, timestamp)
+        return WebhookEventCommand(parkingId, Vehicle(licensePlate), eventType, timestamp)
     }
 }

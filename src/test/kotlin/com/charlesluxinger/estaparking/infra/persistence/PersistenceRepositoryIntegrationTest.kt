@@ -69,13 +69,13 @@ class PersistenceRepositoryIntegrationTest {
     @Test
     fun `Repository persists pricing snapshot and billing record`() {
         val parkingId = "parking-billing-repository-it"
-        val licensePlate = "ABC1234"
+        val vehicle = Vehicle("ABC1234")
 
         val savedSnapshot =
             pricingSnapshotJpaAdapter.save(
                 PricingSnapshot(
                     parkingId = parkingId,
-                    licensePlate = licensePlate,
+                    vehicle = vehicle,
                     sector = "A",
                     basePrice = BigDecimal("10.00"),
                     occupancyPercentageAtEntry = BigDecimal("25.00"),
@@ -88,7 +88,7 @@ class PersistenceRepositoryIntegrationTest {
             billingRecordJpaAdapter.save(
                 BillingRecord(
                     parkingId = parkingId,
-                    licensePlate = licensePlate,
+                    vehicle = vehicle,
                     sector = "A",
                     amount = BigDecimal("11.00"),
                     parkedMinutes = 40,
@@ -96,8 +96,8 @@ class PersistenceRepositoryIntegrationTest {
                 ),
             )
 
-        val loadedSnapshot = pricingSnapshotJpaAdapter.findLatestByParkingIdAndLicensePlate(parkingId, licensePlate)
-        val loadedBilling = billingRecordJpaAdapter.findByParkingIdAndLicensePlate(parkingId, licensePlate)
+        val loadedSnapshot = pricingSnapshotJpaAdapter.findLatestByParkingIdAndLicensePlate(parkingId, vehicle)
+        val loadedBilling = billingRecordJpaAdapter.findByParkingIdAndLicensePlate(parkingId, vehicle)
 
         assertEquals(savedSnapshot, loadedSnapshot)
         assertEquals(listOf(savedBilling), loadedBilling)
@@ -106,12 +106,12 @@ class PersistenceRepositoryIntegrationTest {
     @Test
     fun `Repository maps duplicate billing record constraint to DataIntegrityViolationException`() {
         val parkingId = "parking-duplicate-billing"
-        val licensePlate = "ABC1234"
+        val vehicle = Vehicle("ABC1234")
 
         billingRecordJpaAdapter.save(
             BillingRecord(
                 parkingId = parkingId,
-                licensePlate = licensePlate,
+                vehicle = vehicle,
                 sector = "A",
                 amount = BigDecimal("10.00"),
                 parkedMinutes = 60,
@@ -124,7 +124,7 @@ class PersistenceRepositoryIntegrationTest {
                 billingRecordJpaAdapter.save(
                     BillingRecord(
                         parkingId = parkingId,
-                        licensePlate = licensePlate,
+                        vehicle = vehicle,
                         sector = "A",
                         amount = BigDecimal("20.00"),
                         parkedMinutes = 120,
@@ -169,23 +169,24 @@ class PersistenceRepositoryIntegrationTest {
         parkingSessionJpaAdapter.save(expectedParking)
 
         val fixedTimestamp = java.time.LocalDateTime.of(2025, 1, 1, 12, 0)
+        val vehicle = Vehicle("ABC1234")
         val savedEvents =
             listOf(
                 StoredParkingEvent(
                     parkingId = parkingId,
-                    licensePlate = "ABC1234",
+                    vehicle = vehicle,
                     eventType = EventType.ENTRY,
                     timestamp = fixedTimestamp,
                 ),
                 StoredParkingEvent(
                     parkingId = parkingId,
-                    licensePlate = "ABC1234",
+                    vehicle = vehicle,
                     eventType = EventType.PARKED,
                     timestamp = fixedTimestamp.plusHours(1),
                 ),
                 StoredParkingEvent(
                     parkingId = parkingId,
-                    licensePlate = "ABC1234",
+                    vehicle = vehicle,
                     eventType = EventType.EXIT,
                     timestamp = fixedTimestamp.plusHours(2),
                 ),

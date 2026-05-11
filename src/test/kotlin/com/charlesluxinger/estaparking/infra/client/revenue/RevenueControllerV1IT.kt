@@ -3,9 +3,12 @@ package com.charlesluxinger.estaparking.infra.client.revenue
 import com.charlesluxinger.estaparking.config.ContainersConfig
 import com.charlesluxinger.estaparking.config.EndpointIntegrationTestBase
 import com.charlesluxinger.estaparking.domain.billing.BillingTransaction
+import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 import com.charlesluxinger.estaparking.infra.persistence.billing.BillingTransactionJpaAdapter
 import com.charlesluxinger.estaparking.infra.persistence.billing.BillingTransactionSpringDataRepository
 import com.fasterxml.jackson.databind.ObjectMapper
+import java.math.BigDecimal
+import java.time.LocalDateTime
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -21,8 +24,6 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.ActiveProfiles
-import java.math.BigDecimal
-import java.time.LocalDateTime
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(EndpointIntegrationTestBase::class, ContainersConfig::class)
@@ -50,7 +51,7 @@ class RevenueControllerV1IT : EndpointIntegrationTestBase() {
         billingTransactionJpaAdapter.save(
             BillingTransaction(
                 id = "bt-1",
-                licensePlate = "ABC1234",
+                vehicle = Vehicle("ABC1234"),
                 sector = "A",
                 amount = BigDecimal("100.00"),
                 exitTime = LocalDateTime.of(2025, 1, 1, 10, 0),

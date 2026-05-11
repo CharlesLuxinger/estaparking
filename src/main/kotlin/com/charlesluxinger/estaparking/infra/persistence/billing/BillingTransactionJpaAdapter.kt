@@ -2,8 +2,8 @@ package com.charlesluxinger.estaparking.infra.persistence.billing
 
 import com.charlesluxinger.estaparking.domain.billing.BillingTransaction
 import com.charlesluxinger.estaparking.domain.port.outbound.BillingTransactionRepositoryPort
-import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
+import org.springframework.stereotype.Repository
 
 @Repository
 class BillingTransactionJpaAdapter(

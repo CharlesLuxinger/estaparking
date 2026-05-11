@@ -18,11 +18,11 @@ import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.math.BigDecimal
+import java.time.LocalDateTime
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
-import java.time.LocalDateTime
 
 class HandleWebhookEventUseCaseImplTest {
     @Test
@@ -49,7 +49,7 @@ class HandleWebhookEventUseCaseImplTest {
             useCase.handle(
                 WebhookEventCommand(
                     parkingId = parkingId,
-                    licensePlate = "ABC1234",
+                    vehicle = Vehicle("ABC1234"),
                     eventType = EventType.ENTRY,
                 ),
             )
@@ -84,7 +84,7 @@ class HandleWebhookEventUseCaseImplTest {
             listOf(
                 StoredParkingEvent(
                     parkingId = parkingId,
-                    licensePlate = plate,
+                    vehicle = Vehicle(plate),
                     eventType = EventType.ENTRY,
                     timestamp = java.time.LocalDateTime.of(2025, 1, 1, 12, 0),
                 ),
@@ -94,7 +94,7 @@ class HandleWebhookEventUseCaseImplTest {
             useCase.handle(
                 WebhookEventCommand(
                     parkingId = parkingId,
-                    licensePlate = plate,
+                    vehicle = Vehicle(plate),
                     eventType = EventType.ENTRY,
                 ),
             )
@@ -118,7 +118,7 @@ class HandleWebhookEventUseCaseImplTest {
             useCase.handle(
                 WebhookEventCommand(
                     parkingId = parkingId,
-                    licensePlate = plate,
+                    vehicle = Vehicle(plate),
                     eventType = EventType.ENTRY,
                 ),
             )
@@ -131,7 +131,7 @@ class HandleWebhookEventUseCaseImplTest {
             ports.parkingEventRepositoryPort.save(
                 match {
                     it.parkingId == parkingId &&
-                        it.licensePlate == plate &&
+                        it.vehicle.plate == plate &&
                         it.eventType == EventType.ENTRY
                 },
             )
@@ -148,19 +148,19 @@ class HandleWebhookEventUseCaseImplTest {
             listOf(
                 StoredParkingEvent(
                     parkingId = parkingId,
-                    licensePlate = plate,
+                    vehicle = Vehicle(plate),
                     eventType = EventType.ENTRY,
                     timestamp = LocalDateTime.of(2025, 1, 1, 12, 0),
                 ),
                 StoredParkingEvent(
                     parkingId = parkingId,
-                    licensePlate = plate,
+                    vehicle = Vehicle(plate),
                     eventType = EventType.PARKED,
                     timestamp = LocalDateTime.of(2025, 1, 1, 13, 0),
                 ),
                 StoredParkingEvent(
                     parkingId = parkingId,
-                    licensePlate = plate,
+                    vehicle = Vehicle(plate),
                     eventType = EventType.EXIT,
                     timestamp = LocalDateTime.of(2025, 1, 1, 14, 0),
                 ),
@@ -196,7 +196,7 @@ class HandleWebhookEventUseCaseImplTest {
             listOf(
                 StoredParkingEvent(
                     parkingId = parkingId,
-                    licensePlate = plate,
+                    vehicle = Vehicle(plate),
                     eventType = EventType.ENTRY,
                     timestamp = java.time.LocalDateTime.of(2025, 1, 1, 12, 0),
                 ),
@@ -206,7 +206,7 @@ class HandleWebhookEventUseCaseImplTest {
             useCase.handle(
                 WebhookEventCommand(
                     parkingId = parkingId,
-                    licensePlate = plate,
+                    vehicle = Vehicle(plate),
                     eventType = EventType.ENTRY,
                 ),
             )
@@ -251,7 +251,7 @@ class HandleWebhookEventUseCaseImplTest {
             useCase.handle(
                 WebhookEventCommand(
                     parkingId = parkingId,
-                    licensePlate = "ABC1234",
+                    vehicle = Vehicle("ABC1234"),
                     eventType = EventType.PARKED,
                 ),
             )

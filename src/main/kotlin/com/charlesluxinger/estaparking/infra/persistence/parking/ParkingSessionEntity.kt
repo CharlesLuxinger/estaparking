@@ -18,7 +18,6 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import java.math.BigDecimal
-import java.util.ArrayList
 
 @Entity
 @Table(name = "parking_sessions")
