@@ -1,16 +1,16 @@
 # Graph Report - estaparking  (2026-05-11)
 
 ## Corpus Check
-- 118 files · ~20,068 words
+- 121 files · ~22,136 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 666 nodes · 1042 edges · 66 communities (19 shown, 47 thin omitted)
-- Extraction: 68% EXTRACTED · 32% INFERRED · 0% AMBIGUOUS · INFERRED: 337 edges (avg confidence: 0.8)
+- 762 nodes · 1163 edges · 76 communities (28 shown, 48 thin omitted)
+- Extraction: 69% EXTRACTED · 31% INFERRED · 0% AMBIGUOUS · INFERRED: 366 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6d9a242a`
+- Built from commit: `ad8c30b3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -79,18 +79,28 @@
 - [[_COMMUNITY_Community 61|Community 61]]
 - [[_COMMUNITY_Community 62|Community 62]]
 - [[_COMMUNITY_Community 63|Community 63]]
+- [[_COMMUNITY_Community 64|Community 64]]
+- [[_COMMUNITY_Community 65|Community 65]]
+- [[_COMMUNITY_Community 66|Community 66]]
+- [[_COMMUNITY_Community 67|Community 67]]
+- [[_COMMUNITY_Community 68|Community 68]]
+- [[_COMMUNITY_Community 69|Community 69]]
+- [[_COMMUNITY_Community 70|Community 70]]
+- [[_COMMUNITY_Community 71|Community 71]]
+- [[_COMMUNITY_Community 72|Community 72]]
+- [[_COMMUNITY_Community 73|Community 73]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `Vehicle` - 81 edges
-2. `Spot` - 34 edges
-3. `Parking` - 33 edges
-4. `Coordinates` - 31 edges
+1. `Vehicle` - 83 edges
+2. `Spot` - 38 edges
+3. `Parking` - 35 edges
+4. `Coordinates` - 35 edges
 5. `WebhookControllerV1IT` - 30 edges
 6. `ParkingTest` - 20 edges
-7. `SpotTest` - 18 edges
-8. `HandleWebhookEventUseCaseImplTest` - 16 edges
-9. `PricingPolicyTest` - 16 edges
-10. `HandleWebhookEventUseCaseImpl` - 15 edges
+7. `HandleWebhookEventUseCaseImplTest` - 18 edges
+8. `SpotTest` - 18 edges
+9. `HandleWebhookEventUseCaseImpl` - 17 edges
+10. `Garage` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `toCommand()` --calls--> `WebhookEventCommand`  [INFERRED]
@@ -104,45 +114,41 @@
 - `toDomainSpots()` --calls--> `Spot`  [INFERRED]
   src/main/kotlin/com/charlesluxinger/estaparking/infra/client/simulator/garage/SimulatorGarageMapper.kt → src/main/kotlin/com/charlesluxinger/estaparking/domain/spot/Spot.kt
 
-## Communities (66 total, 47 thin omitted)
+## Communities (76 total, 48 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.06
-Nodes (16): BillingRecord, BillingRecordEntity, fromDomain(), BillingRecordTest, DomainResult, Err, Error, flatMap() (+8 more)
+Nodes (15): BillingTransaction, BillingTransactionEntity, fromDomain(), BillingTransactionTest, fromDomain(), ParkingEventEntity, ParkingEventTest, StoredParkingEvent (+7 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.06
-Nodes (14): SimulatorSpotItem, toDomainSpots(), EntryUseCaseImplTest, ParkedUseCaseImplTest, fromDomain(), ParkingSessionEntity, ParkingSpotSnapshotEntity, PersistenceRepositoryIntegrationTest (+6 more)
+Nodes (27): DomainResult, Err, Error, flatMap(), map(), Ok, Success, ExitBeforeEntry (+19 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.11
-Nodes (4): RecordingWebhookEventCommandPort, SpyWebhookEventCommandPort, TestConfig, WebhookControllerV1IT
+Cohesion: 0.07
+Nodes (12): SimulatorSpotItem, toDomainSpots(), EntryUseCaseImplTest, ParkedUseCaseImplTest, fromDomain(), ParkingSessionEntity, ParkingSpotSnapshotEntity, PersistenceRepositoryIntegrationTest (+4 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.06
-Nodes (19): fromDomain(), GarageEntity, SimulatorGarageItem, toDomainGarages(), SimulatorGarageResponse, SimulatorGarageSnapshot, Garage, GarageTest (+11 more)
+Nodes (20): fromDomain(), GarageEntity, SimulatorGarageItem, toDomainGarages(), SimulatorGarageResponse, SimulatorGarageSnapshot, SimulatorGarageSnapshotTest, Garage (+12 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.11
-Nodes (8): fromDomain(), ParkingEventEntity, ParkingEventTest, StoredParkingEvent, WebhookEventCommand, HandleWebhookEventUseCaseImpl, HandleWebhookEventUseCaseImplTest, MockPorts
+Nodes (4): RecordingWebhookEventCommandPort, SpyWebhookEventCommandPort, TestConfig, WebhookControllerV1IT
 
 ### Community 5 - "Community 5"
-Cohesion: 0.08
-Nodes (20): ExitBeforeEntry, FullOccupancyEntryDenied, InvalidExitOrdering, InvalidParkedOrdering, ParkingDomainError, VehicleNotFoundForTransition, WrongVehicleTransitionAttempt, DomainResult (+12 more)
-
-### Community 6 - "Community 6"
-Cohesion: 0.12
+Cohesion: 0.11
 Nodes (8): SimulatorGarageKtorAdapter, SimulatorGarageKtorAdapterTest, SimulatorGarageRestTemplateAdapter, SimulatorGarageRestTemplateAdapterTest, PayloadMappingFailure, SimulatorGarageClientError, TransportFailure, UnexpectedStatus
 
-### Community 7 - "Community 7"
+### Community 6 - "Community 6"
 Cohesion: 0.1
 Nodes (7): RevenueQueryResponse, RevenueQueryResponseTest, GetRevenueQueryUseCaseImpl, RevenueConfig, RecordingRevenueQueryPort, RevenueControllerV1IT, TestConfig
 
-### Community 8 - "Community 8"
+### Community 7 - "Community 7"
 Cohesion: 0.09
 Nodes (25): Architecture Governance Checks, CI, CODE QUALITY GATES, code:bash (grep -r "import.*\.application\|\.infra" src/main/kotlin/com), code:powershell (if (Test-Path "src/main/kotlin/com/charlesluxinger/estaparki), code:bash (grep -r "import.*\.repository\|\.adapter" src/main/kotlin/co), code:powershell (if (Test-Path "src/main/kotlin/com/charlesluxinger/estaparki), code:bash (# Check if UseCaseImpl exists outside application/service) (+17 more)
 
-### Community 9 - "Community 9"
+### Community 8 - "Community 8"
 Cohesion: 0.1
 Nodes (5): ArchitectureScaffoldTest, ArchitectureTest, ControllerBoundaryTest, DependencyDirectionTest, UseCaseOwnershipTest
 
@@ -151,48 +157,88 @@ Cohesion: 0.18
 Nodes (4): PricingSnapshot, fromDomain(), PricingSnapshotEntity, PricingSnapshotTest
 
 ### Community 12 - "Community 12"
-Cohesion: 0.22
-Nodes (4): BillingTransaction, BillingTransactionEntity, fromDomain(), BillingTransactionTest
+Cohesion: 0.19
+Nodes (4): BillingRecord, BillingRecordEntity, fromDomain(), BillingRecordTest
 
 ### Community 13 - "Community 13"
+Cohesion: 0.13
+Nodes (15): code:bash (curl -X POST http://localhost:3003/webhook \), code:bash (curl -X POST http://localhost:3003/webhook \), code:bash (# Revenue for a specific sector and date range), code:json ({), code:bash (# 1. Entry), code:bash (# Direct simulator call (from host)), code:bash (curl -X POST http://localhost:3003/webhook \), Complete Flow Test (+7 more)
+
+### Community 14 - "Community 14"
+Cohesion: 0.18
+Nodes (4): fromDomain(), SpotEntity, SpotJpaAdapter, SpotJpaAdapterTest
+
+### Community 15 - "Community 15"
+Cohesion: 0.15
+Nodes (13): Build Failures, code:bash (# Find what's using port 8080), code:bash (docker compose ps mysql), code:bash (docker compose logs mysql), code:bash (docker compose ps simulator), code:bash (docker compose logs simulator), code:bash (curl http://localhost:3000/garage), code:bash (./gradlew clean --refresh-dependencies) (+5 more)
+
+### Community 16 - "Community 16"
 Cohesion: 0.18
 Nodes (3): EntryUseCaseImpl, ParkedUseCaseImpl, WebhookConfig
 
-### Community 15 - "Community 15"
-Cohesion: 0.27
-Nodes (4): toCommand(), toEventType(), WebhookEventRequest, WebhookEventRequestTest
+### Community 18 - "Community 18"
+Cohesion: 0.2
+Nodes (10): 1. Format and Lint Check, 2. Static Analysis, 3. Tests with Coverage, code:bash (./gradlew ktlintMainSourceSetCheck ktlintTestSourceSetCheck), code:bash (./gradlew detekt), code:bash (./gradlew test jacocoTestReport), code:bash (# Run all gates in order (matches CI)), code:powershell (.\gradlew.bat ktlintMainSourceSetCheck ktlintTestSourceSetCh) (+2 more)
 
-### Community 17 - "Community 17"
+### Community 20 - "Community 20"
 Cohesion: 0.25
 Nodes (3): RevenueQueryRequest, RevenueQueryRequestTest, RevenueRequest
 
-### Community 18 - "Community 18"
+### Community 21 - "Community 21"
+Cohesion: 0.31
+Nodes (4): toCommand(), toEventType(), WebhookEventRequest, WebhookEventRequestTest
+
+### Community 22 - "Community 22"
+Cohesion: 0.25
+Nodes (8): Application Startup, code:bash (# Start all services), code:bash (# Build without tests), code:bash (# Health check (should return 200 OK with empty or valid JSO), Docker Compose (Recommended), Gradle Commands, Startup Sequence (Docker Compose), Verify Application is Running
+
+### Community 23 - "Community 23"
+Cohesion: 0.25
+Nodes (7): code:bash (# Check Java version), Port Requirements, Prerequisites, Required Tools, Run and Test Guide, Table of Contents, Verify Prerequisites
+
+### Community 24 - "Community 24"
+Cohesion: 0.29
+Nodes (7): code:bash (# Start the entire stack (MySQL + Simulator + App)), code:block3 (NAME                    IMAGE                          STATU), code:bash (# Start MySQL (example using Docker)), Environment Setup, Environment Variables, Option A: Using Docker Compose (Recommended), Option B: Local Development with External Dependencies
+
+### Community 26 - "Community 26"
 Cohesion: 0.33
 Nodes (5): IgnoredDuplicate, NotFound, Processed, RejectedTransition, WebhookEventOutcome
 
-### Community 40 - "Community 40"
+### Community 33 - "Community 33"
+Cohesion: 0.4
+Nodes (5): code:bash (docker ps  # Verify Docker is running), code:bash (# Kill any leftover processes), code:bash (# Clean volumes between runs), code:bash (# Export test variables), Tests Failing
+
+### Community 34 - "Community 34"
+Cohesion: 0.4
+Nodes (5): API Endpoints Summary, code:bash (# Start everything), Common Commands, File Locations, Quick Reference
+
+### Community 48 - "Community 48"
+Cohesion: 0.5
+Nodes (4): App Container Health Check Fails, code:bash (docker compose logs app), code:bash (docker compose exec app printenv SPRING_DATASOURCE_URL), code:yaml (healthcheck:)
+
+### Community 50 - "Community 50"
 Cohesion: 0.5
 Nodes (3): SimulatorGarageItem, SimulatorGarageResponse, SimulatorSpotItem
 
 ## Knowledge Gaps
-- **49 isolated node(s):** `Application`, `Currency`, `ParkingDomainError`, `FullOccupancyEntryDenied`, `VehicleNotFoundForTransition` (+44 more)
+- **91 isolated node(s):** `Application`, `Currency`, `ParkingDomainError`, `FullOccupancyEntryDenied`, `VehicleNotFoundForTransition` (+86 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **47 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **48 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Vehicle` connect `Community 0` to `Community 1`, `Community 4`, `Community 7`, `Community 10`, `Community 12`, `Community 15`, `Community 19`?**
-  _High betweenness centrality (0.171) - this node is a cross-community bridge._
-- **Why does `Error` connect `Community 5` to `Community 0`, `Community 3`, `Community 6`?**
-  _High betweenness centrality (0.067) - this node is a cross-community bridge._
-- **Why does `Spot` connect `Community 1` to `Community 0`, `Community 3`, `Community 4`, `Community 5`?**
-  _High betweenness centrality (0.057) - this node is a cross-community bridge._
-- **Are the 80 inferred relationships involving `Vehicle` (e.g. with `.toCommand()` and `.toDomain()`) actually correct?**
-  _`Vehicle` has 80 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 28 inferred relationships involving `Spot` (e.g. with `toDomainSpots()` and `.toDomain()`) actually correct?**
-  _`Spot` has 28 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 26 inferred relationships involving `Parking` (e.g. with `.toDomain()` and `.`execute returns full occupancy error when no entry is possible`()`) actually correct?**
-  _`Parking` has 26 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 30 inferred relationships involving `Coordinates` (e.g. with `toDomainSpots()` and `.toDomain()`) actually correct?**
-  _`Coordinates` has 30 INFERRED edges - model-reasoned connections that need verification._
+- **Why does `Vehicle` connect `Community 0` to `Community 2`, `Community 6`, `Community 9`, `Community 10`, `Community 12`, `Community 25`?**
+  _High betweenness centrality (0.138) - this node is a cross-community bridge._
+- **Why does `Error` connect `Community 1` to `Community 9`, `Community 3`, `Community 5`?**
+  _High betweenness centrality (0.058) - this node is a cross-community bridge._
+- **Why does `Spot` connect `Community 2` to `Community 0`, `Community 1`, `Community 3`, `Community 9`, `Community 14`?**
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._
+- **Are the 82 inferred relationships involving `Vehicle` (e.g. with `.toCommand()` and `.toDomain()`) actually correct?**
+  _`Vehicle` has 82 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 32 inferred relationships involving `Spot` (e.g. with `toDomainSpots()` and `.toDomain()`) actually correct?**
+  _`Spot` has 32 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 28 inferred relationships involving `Parking` (e.g. with `.toDomain()` and `.`execute returns full occupancy error when no entry is possible`()`) actually correct?**
+  _`Parking` has 28 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 34 inferred relationships involving `Coordinates` (e.g. with `toDomainSpots()` and `.toDomain()`) actually correct?**
+  _`Coordinates` has 34 INFERRED edges - model-reasoned connections that need verification._
