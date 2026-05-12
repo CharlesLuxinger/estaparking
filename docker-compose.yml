@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: estaparking-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: estaparking
+      MYSQL_USER: estaparking
+      MYSQL_PASSWORD: estaparking
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpass"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - estaparking-network
+
+  simulator:
+    image: cfontes0estapar/garage-sim:1.0.0
+    container_name: estaparking-simulator
+    network_mode: host
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: estaparking-app
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/estaparking?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=estaparking
+      - SPRING_DATASOURCE_PASSWORD=estaparking
+      - SIMULATOR_BASE_URL=http://host.docker.internal:3000
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/revenue"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    networks:
+      - estaparking-network
+
+volumes:
+  mysql_data:
+
+networks:
+  estaparking-network:
+    driver: bridge
