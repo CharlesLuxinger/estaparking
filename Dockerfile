@@ -1,5 +1,5 @@
 # Build stage
-FROM eclipse-temurin:25-jdk AS build
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 
 # Copy build files first for better caching
@@ -17,7 +17,7 @@ RUN chmod +x gradlew && \
     ./gradlew build -x test --no-daemon
 
 # Runtime stage
-FROM eclipse-temurin:25-jre
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 # Install curl for health checks
