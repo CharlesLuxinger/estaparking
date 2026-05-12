@@ -3,6 +3,7 @@ package com.charlesluxinger.estaparking.domain.event
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -52,5 +53,27 @@ class ParkingEventTest {
                 timestamp = LocalDateTime.now(),
             )
         }
+    }
+
+    @Test
+    fun `stored parking event data class supports equality and copy`() {
+        val timestamp = LocalDateTime.now()
+        val event =
+            StoredParkingEvent(
+                parkingId = "parking-123",
+                vehicle = Vehicle("ABC1234"),
+                eventType = EventType.PARKED,
+                timestamp = timestamp,
+            )
+
+        assertEquals(event, event.copy())
+        assertNotEquals(event, event.copy(parkingId = "parking-999"))
+    }
+
+    @Test
+    fun `event type exposes all expected values`() {
+        val eventTypes = EventType.entries
+
+        assertEquals(listOf(EventType.ENTRY, EventType.PARKED, EventType.EXIT), eventTypes)
     }
 }
