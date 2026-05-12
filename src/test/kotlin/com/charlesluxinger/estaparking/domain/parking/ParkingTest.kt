@@ -77,7 +77,11 @@ class ParkingTest {
                 name = "Central",
                 spots =
                     listOf(
-                        createSpot(id = 1L, status = SpotStatus.ENTRY_REGISTERED, occupiedBy = Vehicle(plate = "AAA0000")),
+                        createSpot(
+                            id = 1L,
+                            status = SpotStatus.ENTRY_REGISTERED,
+                            occupiedBy = Vehicle(plate = "AAA0000"),
+                        ),
                         createSpot(id = 2L, status = SpotStatus.PARKED, occupiedBy = Vehicle(plate = "BBB1111")),
                     ),
             )
@@ -281,7 +285,11 @@ class ParkingTest {
                 spots =
                     listOf(
                         createSpot(id = 1L),
-                        createSpot(id = 2L, status = SpotStatus.ENTRY_REGISTERED, occupiedBy = Vehicle(plate = "AAA0000")),
+                        createSpot(
+                            id = 2L,
+                            status = SpotStatus.ENTRY_REGISTERED,
+                            occupiedBy = Vehicle(plate = "AAA0000"),
+                        ),
                         createSpot(id = 3L, status = SpotStatus.PARKED, occupiedBy = Vehicle(plate = "BBB1111")),
                     ),
             )

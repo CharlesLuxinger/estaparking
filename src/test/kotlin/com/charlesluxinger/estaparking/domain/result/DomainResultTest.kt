@@ -55,7 +55,10 @@ class DomainResultTest {
 
     @Test
     fun `fold uses error branch`() {
-        val result: DomainResult<Int, ParkingDomainError> = DomainResult.Error(ParkingDomainError.FullOccupancyEntryDenied)
+        val result: DomainResult<Int, ParkingDomainError> =
+            DomainResult.Error(
+                ParkingDomainError.FullOccupancyEntryDenied,
+            )
 
         val folded = result.fold(onSuccess = { "value:$it" }, onFailure = { "error" })
 
@@ -72,7 +75,10 @@ class DomainResultTest {
 
     @Test
     fun `error data class supports equality and copy`() {
-        val error: DomainResult.Error<ParkingDomainError> = DomainResult.Error(ParkingDomainError.FullOccupancyEntryDenied)
+        val error: DomainResult.Error<ParkingDomainError> =
+            DomainResult.Error(
+                ParkingDomainError.FullOccupancyEntryDenied,
+            )
         val transitionError = ParkingDomainError.ExitBeforeEntry(spotId = 1L, currentStatus = SpotStatus.AVAILABLE)
 
         assertEquals(DomainResult.Error(ParkingDomainError.FullOccupancyEntryDenied), error)

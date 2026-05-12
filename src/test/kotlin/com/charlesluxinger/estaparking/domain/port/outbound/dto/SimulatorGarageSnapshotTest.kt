@@ -12,7 +12,8 @@ class SimulatorGarageSnapshotTest {
     @Test
     fun `should keep garages and spots`() {
         val garage = Garage(sector = "A", basePrice = BigDecimal("10.00"), maxCapacity = 100)
-        val spot = Spot(id = 1L, sector = "A", coordinates = Coordinates(BigDecimal("-23.55052"), BigDecimal("-46.633308")))
+        val spot =
+            Spot(id = 1L, sector = "A", coordinates = Coordinates(BigDecimal("-23.55052"), BigDecimal("-46.633308")))
 
         val snapshot = SimulatorGarageSnapshot(garages = listOf(garage), spots = listOf(spot))
 
@@ -24,7 +25,8 @@ class SimulatorGarageSnapshotTest {
     fun `data class generated methods are exercised`() {
         val garageA = Garage(sector = "A", basePrice = BigDecimal("10.00"), maxCapacity = 100)
         val garageB = Garage(sector = "B", basePrice = BigDecimal("12.50"), maxCapacity = 150)
-        val spot = Spot(id = 1L, sector = "A", coordinates = Coordinates(BigDecimal("-23.55052"), BigDecimal("-46.633308")))
+        val spot =
+            Spot(id = 1L, sector = "A", coordinates = Coordinates(BigDecimal("-23.55052"), BigDecimal("-46.633308")))
 
         val original = SimulatorGarageSnapshot(garages = listOf(garageA), spots = listOf(spot))
         val sameValues = SimulatorGarageSnapshot(garages = listOf(garageA), spots = listOf(spot))

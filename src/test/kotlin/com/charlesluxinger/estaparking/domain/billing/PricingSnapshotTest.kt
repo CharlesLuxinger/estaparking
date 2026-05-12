@@ -146,16 +146,16 @@ class PricingSnapshotTest {
     fun `should fail when multiplier is negative`() {
         val exception =
             assertThrows<IllegalArgumentException> {
-            PricingSnapshot(
-                parkingId = "P1",
-                vehicle = vehicle,
-                sector = "A",
-                basePrice = BigDecimal("10.0"),
-                occupancyPercentageAtEntry = BigDecimal("50.0"),
-                multiplierAtEntry = BigDecimal("-1.0"),
-                entryAt = entryAt,
-            )
-        }
+                PricingSnapshot(
+                    parkingId = "P1",
+                    vehicle = vehicle,
+                    sector = "A",
+                    basePrice = BigDecimal("10.0"),
+                    occupancyPercentageAtEntry = BigDecimal("50.0"),
+                    multiplierAtEntry = BigDecimal("-1.0"),
+                    entryAt = entryAt,
+                )
+            }
 
         assertEquals("Multiplier must be greater than zero", exception.message)
     }

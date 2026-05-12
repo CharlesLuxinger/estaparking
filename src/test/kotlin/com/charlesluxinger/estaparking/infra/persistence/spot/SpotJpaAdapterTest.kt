@@ -1,12 +1,8 @@
 package com.charlesluxinger.estaparking.infra.persistence.spot
 
-import com.charlesluxinger.estaparking.domain.spot.Coordinates
-import com.charlesluxinger.estaparking.domain.spot.Spot
 import com.charlesluxinger.estaparking.domain.spot.SpotStatus
-import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import java.math.BigDecimal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull

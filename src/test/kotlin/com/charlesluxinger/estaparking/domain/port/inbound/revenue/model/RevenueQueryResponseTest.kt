@@ -33,8 +33,10 @@ class RevenueQueryResponseTest {
     @Test
     fun `data class generated methods are exercised`() {
         val timestamp = LocalDateTime.of(2026, 5, 11, 12, 0)
-        val original = RevenueQueryResponse(amount = BigDecimal("100.50"), currency = Currency.BRL, timestamp = timestamp)
-        val sameValues = RevenueQueryResponse(amount = BigDecimal("100.50"), currency = Currency.BRL, timestamp = timestamp)
+        val original =
+            RevenueQueryResponse(amount = BigDecimal("100.50"), currency = Currency.BRL, timestamp = timestamp)
+        val sameValues =
+            RevenueQueryResponse(amount = BigDecimal("100.50"), currency = Currency.BRL, timestamp = timestamp)
         val different = original.copy(amount = BigDecimal("200.00"))
 
         assertEquals(original, sameValues)
