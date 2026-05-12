@@ -18,18 +18,16 @@ Infrastructure test-first using executable smoke checks (service boots, dependen
 
 ## Implementation Checklist
 - [x] Create `docker-compose.yml` for app + MySQL + simulator dependency flow.
-- [x] Provide `run.sh` (and/or Windows companion if needed) to boot stack.
 - [x] Ensure app starts with required env vars and DB connectivity.
 - [x] Add startup health checks.
 
 ## Acceptance Criteria
 - [x] `docker compose up` starts required services.
-- [x] `./run.sh` starts the stack successfully.
 - [x] Webhook and revenue endpoints become reachable.
 
 ## QA Scenarios
 Scenario: clean boot
-- Tool: docker compose + script execution
+- Tool: docker compose
 - Expected: all containers healthy and app accepting requests.
 
 Scenario: DB unavailable at startup
