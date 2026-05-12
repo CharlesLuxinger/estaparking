@@ -162,4 +162,70 @@ class SimulatorGarageRestTemplateAdapterTest {
             adapter.fetchGarage()
         }
     }
+
+    @Test
+    fun `fetchGarage handles IOException as transport failure`() {
+        val restTemplate = mockk<RestTemplate>()
+        every {
+            restTemplate.getForEntity("http://simulator.local/garage", String::class.java)
+        } throws java.io.IOException("Network error")
+
+        val adapter =
+            SimulatorGarageRestTemplateAdapter(
+                simulatorBaseUrl = "http://simulator.local",
+                restTemplate = restTemplate,
+                objectMapper = jacksonObjectMapper(),
+            )
+
+        val result = adapter.fetchGarage()
+
+        assertTrue(result is Error)
+        result as Error
+        assertTrue(result.error is TransportFailure)
+    }
+
+    @Test
+    fun `fetchGarage handles RestClientResponseException as unexpected status`() {
+        val restTemplate = mockk<RestTemplate>()
+        val mockException = mockk<org.springframework.web.client.RestClientResponseException>()
+        every { mockException.statusCode } returns org.springframework.http.HttpStatus.NOT_FOUND
+        every { mockException.responseBodyAsString } returns "Not Found"
+        every {
+            restTemplate.getForEntity("http://simulator.local/garage", String::class.java)
+        } throws mockException
+
+        val adapter =
+            SimulatorGarageRestTemplateAdapter(
+                simulatorBaseUrl = "http://simulator.local",
+                restTemplate = restTemplate,
+                objectMapper = jacksonObjectMapper(),
+            )
+
+        val result = adapter.fetchGarage()
+
+        assertTrue(result is Error)
+        result as Error
+        assertTrue(result.error is UnexpectedStatus)
+    }
+
+    @Test
+    fun `fetchGarage handles IllegalArgumentException as payload mapping failure`() {
+        val restTemplate = mockk<RestTemplate>()
+        every {
+            restTemplate.getForEntity("http://simulator.local/garage", String::class.java)
+        } throws IllegalArgumentException("Invalid argument")
+
+        val adapter =
+            SimulatorGarageRestTemplateAdapter(
+                simulatorBaseUrl = "http://simulator.local",
+                restTemplate = restTemplate,
+                objectMapper = jacksonObjectMapper(),
+            )
+
+        val result = adapter.fetchGarage()
+
+        assertTrue(result is Error)
+        result as Error
+        assertTrue(result.error is PayloadMappingFailure)
+    }
 }
