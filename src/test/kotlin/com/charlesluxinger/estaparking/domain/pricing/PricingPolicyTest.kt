@@ -6,6 +6,13 @@ import org.junit.jupiter.api.Test
 
 class PricingPolicyTest {
     @Test
+    fun `calculateAmount returns zero for 0 minutes`() {
+        val amount = PricingPolicy.calculateAmount(BigDecimal("10.00"), 0, BigDecimal("50"))
+
+        assertEquals(BigDecimal("0.00"), amount)
+    }
+
+    @Test
     fun `calculateAmount returns zero for 30 minutes`() {
         val amount = PricingPolicy.calculateAmount(BigDecimal("10.00"), 30, BigDecimal("50"))
 

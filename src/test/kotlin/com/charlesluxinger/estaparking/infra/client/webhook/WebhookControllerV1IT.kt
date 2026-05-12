@@ -15,6 +15,10 @@ import com.charlesluxinger.estaparking.infra.persistence.billing.PricingSnapshot
 import com.charlesluxinger.estaparking.infra.persistence.event.ParkingEventSpringDataRepository
 import com.charlesluxinger.estaparking.infra.persistence.parking.ParkingSessionSpringDataRepository
 import com.charlesluxinger.estaparking.infra.persistence.spot.SpotSpringDataRepository
+import io.restassured.http.ContentType
+import io.restassured.module.kotlin.extensions.Given
+import io.restassured.module.kotlin.extensions.Then
+import io.restassured.module.kotlin.extensions.When
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -33,6 +37,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -43,6 +48,9 @@ import org.springframework.test.context.ActiveProfiles
     WebhookControllerV1IT.TestConfig::class,
 )
 class WebhookControllerV1IT : EndpointIntegrationTestBase() {
+    @LocalServerPort
+    private var serverPort: Int = 0
+
     @Autowired
     private lateinit var restTemplate: TestRestTemplate
 
@@ -195,12 +203,137 @@ class WebhookControllerV1IT : EndpointIntegrationTestBase() {
         assertEquals(1, spyWebhookEventCommandPort.receivedCount())
     }
 
+    @Test
+    fun `post webhook missing parking_id returns client error and keeps database clean`() {
+        val response =
+            postWebhook(
+                """
+                {
+                    "license_plate":"ABC1234",
+                    "event_type":"ENTRY"
+                }
+                """.trimIndent(),
+            )
+        assertEquals(HttpStatus.BAD_REQUEST.value(), response.statusCode.value())
+    }
+
+    @Test
+    fun `missing parking_id returns 400 validation error`() {
+        postWebhookWithRestAssured(
+            """
+            {
+                "license_plate":"ABC1234",
+                "event_type":"ENTRY"
+            }
+            """.trimIndent(),
+        ).statusCode(HttpStatus.BAD_REQUEST.value())
+    }
+
+    @Test
+    fun `missing license_plate returns 400 validation error`() {
+        postWebhookWithRestAssured(
+            """
+            {
+                "parking_id":"parking-missing-plate",
+                "event_type":"ENTRY"
+            }
+            """.trimIndent(),
+        ).statusCode(HttpStatus.BAD_REQUEST.value())
+    }
+
+    @Test
+    fun `missing event_type returns 400 validation error`() {
+        postWebhookWithRestAssured(
+            """
+            {
+                "parking_id":"parking-missing-event-type",
+                "license_plate":"ABC1234"
+            }
+            """.trimIndent(),
+        ).statusCode(HttpStatus.BAD_REQUEST.value())
+    }
+
+    @Test
+    fun `invalid event_type returns 400 validation error`() {
+        postWebhookWithRestAssured(
+            """
+            {
+                "parking_id":"parking-invalid-event-type",
+                "license_plate":"ABC1234",
+                "event_type":"INVALID_EVENT_TYPE"
+            }
+            """.trimIndent(),
+        ).statusCode(HttpStatus.BAD_REQUEST.value())
+    }
+
+    @Test
+    fun `null parking_id returns 400 validation error`() {
+        postWebhookWithRestAssured(
+            """
+            {
+                "parking_id":null,
+                "license_plate":"ABC1234",
+                "event_type":"ENTRY"
+            }
+            """.trimIndent(),
+        ).statusCode(HttpStatus.BAD_REQUEST.value())
+    }
+
+    @Test
+    fun `empty string parking_id returns 400 validation error`() {
+        postWebhookWithRestAssured(
+            """
+            {
+                "parking_id":"",
+                "license_plate":"ABC1234",
+                "event_type":"ENTRY"
+            }
+            """.trimIndent(),
+        ).statusCode(HttpStatus.BAD_REQUEST.value())
+    }
+
+    @Test
+    fun `license plate invalid format returns 400 validation error`() {
+        postWebhookWithRestAssured(
+            """
+            {
+                "parking_id":"parking-invalid-license-plate",
+                "license_plate":"abc1234",
+                "event_type":"ENTRY"
+            }
+            """.trimIndent(),
+        ).statusCode(HttpStatus.BAD_REQUEST.value())
+    }
+
+    @Test
+    fun `empty string license_plate returns 400 validation error`() {
+        postWebhookWithRestAssured(
+            """
+            {
+                "parking_id":"parking-empty-license-plate",
+                "license_plate":"",
+                "event_type":"ENTRY"
+            }
+            """.trimIndent(),
+        ).statusCode(HttpStatus.BAD_REQUEST.value())
+    }
+
     private fun postWebhook(payload: String): ResponseEntity<Unit> {
         val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
         val request = HttpEntity(payload, headers)
 
         return restTemplate.postForEntity("/webhook", request, Unit::class.java)
     }
+
+    private fun postWebhookWithRestAssured(payload: String) =
+        Given {
+            port(serverPort)
+            contentType(ContentType.JSON)
+            body(payload)
+        } When {
+            post("/webhook")
+        } Then {
+        }
 
     private fun buildPayload(
         parkingId: String,

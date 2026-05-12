@@ -11,6 +11,7 @@ import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 import io.mockk.every
 import io.mockk.mockk
 import java.math.BigDecimal
+import java.math.RoundingMode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -43,6 +44,49 @@ class ParkingTest {
             }
 
         assertEquals("Parking name must not be blank", exception.message)
+    }
+
+    @Test
+    fun `isFull returns true when there are no spots`() {
+        val parking = Parking(id = "parking-1", name = "Central", spots = emptyList())
+
+        assertTrue(parking.isFull())
+    }
+
+    @Test
+    fun `isFull returns false when at least one spot can accept entry`() {
+        val parking =
+            Parking(
+                id = "parking-1",
+                name = "Central",
+                spots =
+                    listOf(
+                        createSpot(id = 1L, status = SpotStatus.PARKED, occupiedBy = Vehicle(plate = "AAA0000")),
+                        createSpot(id = 2L),
+                    ),
+            )
+
+        assertTrue(!parking.isFull())
+    }
+
+    @Test
+    fun `isFull returns true when all spots are occupied or reserved`() {
+        val parking =
+            Parking(
+                id = "parking-1",
+                name = "Central",
+                spots =
+                    listOf(
+                        createSpot(
+                            id = 1L,
+                            status = SpotStatus.ENTRY_REGISTERED,
+                            occupiedBy = Vehicle(plate = "AAA0000"),
+                        ),
+                        createSpot(id = 2L, status = SpotStatus.PARKED, occupiedBy = Vehicle(plate = "BBB1111")),
+                    ),
+            )
+
+        assertTrue(parking.isFull())
     }
 
     @Test
@@ -223,6 +267,34 @@ class ParkingTest {
             ),
             error,
         )
+    }
+
+    @Test
+    fun `occupancyPercentage returns zero when parking has no spots`() {
+        val parking = Parking(id = "parking-1", name = "Central", spots = emptyList())
+
+        assertEquals(BigDecimal.ZERO, parking.occupancyPercentage())
+    }
+
+    @Test
+    fun `occupancyPercentage returns percentage rounded to two decimals`() {
+        val parking =
+            Parking(
+                id = "parking-1",
+                name = "Central",
+                spots =
+                    listOf(
+                        createSpot(id = 1L),
+                        createSpot(
+                            id = 2L,
+                            status = SpotStatus.ENTRY_REGISTERED,
+                            occupiedBy = Vehicle(plate = "AAA0000"),
+                        ),
+                        createSpot(id = 3L, status = SpotStatus.PARKED, occupiedBy = Vehicle(plate = "BBB1111")),
+                    ),
+            )
+
+        assertEquals(BigDecimal("66.67").setScale(2, RoundingMode.HALF_UP), parking.occupancyPercentage())
     }
 
     private fun createParkingWithAvailableSpots(): Parking =
