@@ -1,5 +1,6 @@
 package com.charlesluxinger.estaparking.domain.port.inbound.webhook.model
 
+import com.charlesluxinger.estaparking.domain.common.Coordinates
 import com.charlesluxinger.estaparking.domain.event.EventType
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 import java.time.LocalDateTime
@@ -9,6 +10,7 @@ data class WebhookEventCommand(
     val vehicle: Vehicle,
     val eventType: EventType,
     val occurredAt: LocalDateTime? = null,
+    val coordinates: Coordinates,
 ) {
     init {
         require(parkingId.isNotBlank()) { "Parking id must not be blank" }

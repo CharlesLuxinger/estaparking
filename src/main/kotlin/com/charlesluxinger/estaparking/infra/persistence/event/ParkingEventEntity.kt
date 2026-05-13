@@ -1,5 +1,6 @@
 package com.charlesluxinger.estaparking.infra.persistence.event
 
+import com.charlesluxinger.estaparking.domain.common.Coordinates
 import com.charlesluxinger.estaparking.domain.event.EventType
 import com.charlesluxinger.estaparking.domain.event.ParkingEvent
 import com.charlesluxinger.estaparking.domain.event.StoredParkingEvent
@@ -12,6 +13,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @Entity
@@ -29,6 +31,10 @@ class ParkingEventEntity(
     @Enumerated(EnumType.STRING)
     @Column(name = "event_type", nullable = false)
     val eventType: EventType = EventType.ENTRY,
+    @Column(name = "latitude")
+    val latitude: BigDecimal,
+    @Column(name = "longitude")
+    val longitude: BigDecimal,
     @Column(name = "timestamp", nullable = false)
     val timestamp: LocalDateTime = LocalDateTime.now(),
 ) {
@@ -37,6 +43,7 @@ class ParkingEventEntity(
             parkingId = parkingId,
             vehicle = Vehicle(licensePlate),
             eventType = eventType,
+            coordinates = Coordinates(latitude, longitude),
             timestamp = timestamp,
         )
 
@@ -50,6 +57,8 @@ class ParkingEventEntity(
                 parkingId = domain.parkingId,
                 licensePlate = domain.vehicle.plate,
                 eventType = domain.eventType,
+                latitude = domain.coordinates.latitude,
+                longitude = domain.coordinates.longitude,
                 timestamp = domain.timestamp,
             )
     }

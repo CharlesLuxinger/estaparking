@@ -1,6 +1,8 @@
 package com.charlesluxinger.estaparking.domain.event
 
+import com.charlesluxinger.estaparking.domain.common.Coordinates
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -11,6 +13,7 @@ class ParkingEventTest {
     @Test
     fun `should have vehicle property on ParkingEvent interface`() {
         val vehicle = Vehicle("ABC1234")
+        val coordinates = Coordinates(BigDecimal("-23.5500000"), BigDecimal("-46.6300000"))
         val timestamp = LocalDateTime.now()
 
         val event: ParkingEvent =
@@ -19,6 +22,7 @@ class ParkingEventTest {
                 vehicle = vehicle,
                 eventType = EventType.ENTRY,
                 timestamp = timestamp,
+                coordinates = coordinates,
             )
 
         assertEquals(vehicle, event.vehicle)
@@ -27,6 +31,7 @@ class ParkingEventTest {
     @Test
     fun `should create StoredParkingEvent with Vehicle`() {
         val vehicle = Vehicle("ABC1234")
+        val coordinates = Coordinates(BigDecimal("-23.5500000"), BigDecimal("-46.6300000"))
         val timestamp = LocalDateTime.now()
 
         val event =
@@ -35,6 +40,7 @@ class ParkingEventTest {
                 vehicle = vehicle,
                 eventType = EventType.ENTRY,
                 timestamp = timestamp,
+                coordinates = coordinates,
             )
 
         assertEquals("parking-123", event.parkingId)
@@ -51,6 +57,7 @@ class ParkingEventTest {
                 vehicle = Vehicle("invalid"),
                 eventType = EventType.ENTRY,
                 timestamp = LocalDateTime.now(),
+                coordinates = Coordinates(BigDecimal("-23.5500000"), BigDecimal("-46.6300000")),
             )
         }
     }
@@ -64,6 +71,7 @@ class ParkingEventTest {
                 vehicle = Vehicle("ABC1234"),
                 eventType = EventType.PARKED,
                 timestamp = timestamp,
+                coordinates = Coordinates(BigDecimal("-23.5500000"), BigDecimal("-46.6300000")),
             )
 
         assertEquals(event, event.copy())

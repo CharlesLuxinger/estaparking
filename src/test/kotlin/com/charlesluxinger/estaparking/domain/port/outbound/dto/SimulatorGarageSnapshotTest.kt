@@ -1,7 +1,7 @@
 package com.charlesluxinger.estaparking.domain.port.outbound.dto
 
 import com.charlesluxinger.estaparking.domain.garage.Garage
-import com.charlesluxinger.estaparking.domain.spot.Coordinates
+import com.charlesluxinger.estaparking.domain.common.Coordinates
 import com.charlesluxinger.estaparking.domain.spot.Spot
 import java.math.BigDecimal
 import org.junit.jupiter.api.Assertions.assertEquals

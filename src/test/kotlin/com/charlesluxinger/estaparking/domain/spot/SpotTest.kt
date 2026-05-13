@@ -1,5 +1,6 @@
 package com.charlesluxinger.estaparking.domain.spot
 
+import com.charlesluxinger.estaparking.domain.common.Coordinates
 import com.charlesluxinger.estaparking.domain.error.ParkingDomainError
 import com.charlesluxinger.estaparking.domain.event.EventType
 import com.charlesluxinger.estaparking.domain.result.DomainResult.Error

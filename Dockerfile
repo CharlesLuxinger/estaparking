@@ -1,34 +1,15 @@
-# Build stage
-FROM eclipse-temurin:21-jdk AS build
-WORKDIR /app
-
-# Copy build files first for better caching
-COPY gradle gradle
-COPY gradlew ./
-COPY build.gradle.kts ./
-COPY settings.gradle.kts ./
-COPY config config
-
-# Copy source code
-COPY src src
-
-# Build the application
-RUN chmod +x gradlew && \
-    ./gradlew build -x test --no-daemon
-
-# Runtime stage
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 # Install curl for health checks
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-# Copy the built artifact
-COPY --from=build /app/build/libs/*.jar app.jar
+# Copy the pre-built artifact from host
+COPY build/libs/estaparking-0.0.1-SNAPSHOT.jar app.jar
 
-# Create non-root user for security
-RUN groupadd -g 1000 estaparking && \
-    useradd -r -u 1000 -g estaparking estaparking
+# Create non-root user for security (using GID/UID 2000 to avoid conflicts)
+RUN groupadd -g 2000 estaparking && \
+    useradd -r -u 2000 -g estaparking estaparking
 RUN chown -R estaparking:estaparking /app
 USER estaparking
 

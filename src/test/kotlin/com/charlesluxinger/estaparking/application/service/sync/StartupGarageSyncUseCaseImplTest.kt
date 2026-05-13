@@ -9,7 +9,7 @@ import com.charlesluxinger.estaparking.domain.port.outbound.SpotRepositoryPort
 import com.charlesluxinger.estaparking.domain.port.outbound.dto.SimulatorGarageSnapshot
 import com.charlesluxinger.estaparking.domain.result.DomainResult.Error
 import com.charlesluxinger.estaparking.domain.result.DomainResult.Success
-import com.charlesluxinger.estaparking.domain.spot.Coordinates
+import com.charlesluxinger.estaparking.domain.common.Coordinates
 import com.charlesluxinger.estaparking.domain.spot.Spot
 import io.mockk.every
 import io.mockk.mockk

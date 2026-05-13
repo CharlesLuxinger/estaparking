@@ -5,9 +5,11 @@ import com.charlesluxinger.estaparking.domain.port.outbound.SimulatorGarageClien
 import com.charlesluxinger.estaparking.domain.port.outbound.SimulatorGarageClientError.UnexpectedStatus
 import com.charlesluxinger.estaparking.domain.result.DomainResult.Error
 import com.charlesluxinger.estaparking.domain.result.DomainResult.Success
+import com.charlesluxinger.estaparking.infra.client.simulator.garage.dto.SimulatorGarageResponse
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
+import java.math.BigDecimal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -25,6 +27,21 @@ import org.springframework.web.client.RestTemplate
 
 class SimulatorGarageRestTemplateAdapterTest {
     @Test
+    fun `jackson deserializes simulator garage item using base_price`() {
+        val payload =
+            """
+            {
+              "garage": [{"sector": "A", "base_price": 10.0, "max_capacity": 100}],
+              "spots": [{"id": 1, "sector": "A", "lat": -23.561684, "lng": -46.655981}]
+            }
+            """.trimIndent()
+
+        val parsed = jacksonObjectMapper().readValue(payload, SimulatorGarageResponse::class.java)
+
+        assertEquals(BigDecimal("10.0"), parsed.garage.first().basePrice)
+    }
+
+    @Test
     fun `fetchGarage maps simulator payload to domain snapshot`() {
         val restTemplate = RestTemplate()
         val server = MockRestServiceServer.bindTo(restTemplate).build()
@@ -37,7 +54,7 @@ class SimulatorGarageRestTemplateAdapterTest {
                     .body(
                         """
                         {
-                          "garage": [{"sector": "A", "basePrice": 10.0, "max_capacity": 100}],
+                          "garage": [{"sector": "A", "base_price": 10.0, "max_capacity": 100}],
                           "spots": [{"id": 1, "sector": "A", "lat": -23.561684, "lng": -46.655981}]
                         }
                         """.trimIndent(),
@@ -106,7 +123,7 @@ class SimulatorGarageRestTemplateAdapterTest {
             .andRespond(
                 withStatus(HttpStatus.OK)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body("""{"garage":[{"sector":"A","basePrice":"abc","max_capacity":100}],"spots":[]}"""),
+                    .body("""{"garage":[{"sector":"A","base_price":"abc","max_capacity":100}],"spots":[]}"""),
             )
 
         val adapter =

@@ -1,5 +1,6 @@
 package com.charlesluxinger.estaparking.domain.parking
 
+import com.charlesluxinger.estaparking.domain.common.Coordinates
 import com.charlesluxinger.estaparking.domain.error.ParkingDomainError
 import com.charlesluxinger.estaparking.domain.event.EventType
 import com.charlesluxinger.estaparking.domain.result.DomainResult
@@ -26,11 +27,12 @@ data class Parking(
     fun apply(
         eventType: EventType,
         vehicle: Vehicle,
+        coordinates: Coordinates? = null,
     ): DomainResult<Parking, ParkingDomainError> =
         when (eventType) {
             EventType.ENTRY -> allocateForEntry(vehicle)
-            EventType.PARKED -> transitionOccupiedSpot(eventType, vehicle)
-            EventType.EXIT -> transitionOccupiedSpot(eventType, vehicle)
+            EventType.PARKED -> transitionOccupiedSpot(eventType, vehicle, coordinates)
+            EventType.EXIT -> transitionOccupiedSpot(eventType, vehicle, coordinates)
         }
 
     private fun allocateForEntry(vehicle: Vehicle): DomainResult<Parking, ParkingDomainError> =
@@ -41,7 +43,7 @@ data class Parking(
             val availableIndex = spots.indexOfFirst { it.canAcceptEntry() }
 
             when (val transition = spots[availableIndex].transition(EventType.ENTRY, vehicle)) {
-                is DomainResult.Success -> {
+                is Success -> {
                     nextSpots[availableIndex] = transition.value
                     Success(copy(spots = nextSpots))
                 }
@@ -53,14 +55,15 @@ data class Parking(
     private fun transitionOccupiedSpot(
         eventType: EventType,
         vehicle: Vehicle,
+        coordinates: Coordinates? = null,
     ): DomainResult<Parking, ParkingDomainError> {
         val index = spots.indexOfFirst { it.occupiedBy == vehicle }
 
         return if (index < 0) {
             resolveMissingVehicleTransition(eventType, vehicle)
         } else {
-            when (val transition = spots[index].transition(eventType, vehicle)) {
-                is DomainResult.Success -> {
+            when (val transition = spots[index].transition(eventType, vehicle, coordinates)) {
+                is Success -> {
                     val nextSpots = spots.toMutableList().apply { this[index] = transition.value }
                     Success(copy(spots = nextSpots))
                 }

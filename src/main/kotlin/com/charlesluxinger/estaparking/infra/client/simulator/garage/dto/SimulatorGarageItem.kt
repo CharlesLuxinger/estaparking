@@ -9,6 +9,7 @@ import java.math.BigDecimal
 
 data class SimulatorGarageItem(
     val sector: String,
+    @JsonProperty("base_price")
     val basePrice: BigDecimal,
     @JsonProperty("max_capacity")
     val maxCapacity: Int,

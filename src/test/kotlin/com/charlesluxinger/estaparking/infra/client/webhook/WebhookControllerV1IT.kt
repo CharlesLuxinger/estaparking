@@ -19,9 +19,11 @@ import io.restassured.http.ContentType
 import io.restassured.module.kotlin.extensions.Given
 import io.restassured.module.kotlin.extensions.Then
 import io.restassured.module.kotlin.extensions.When
+import java.time.LocalDateTime
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,6 +31,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
@@ -37,7 +40,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -128,15 +130,14 @@ class WebhookControllerV1IT : EndpointIntegrationTestBase() {
     }
 
     @Test
-    fun `post webhook with ENTRY and entry_time maps to occuredAt`() {
+    fun `post webhook with ENTRY and entry_time maps to occurredAt`() {
         val response =
             postWebhook(
                 buildPayload(
                     parkingId = "parking-entry-time",
                     licensePlate = "ABC1234",
                     eventType = EventType.ENTRY.name,
-                    timestampField = "entry_time",
-                    timestampValue = "2025-01-01T10:00:00.000Z",
+                    entryTime = LocalDateTime.of(2025, 1, 1, 12, 0)
                 ),
             )
 
@@ -145,15 +146,14 @@ class WebhookControllerV1IT : EndpointIntegrationTestBase() {
     }
 
     @Test
-    fun `post webhook with EXIT and exit_time maps to occuredAt`() {
+    fun `post webhook with EXIT and exit_time maps to occurredAt`() {
         val response =
             postWebhook(
                 buildPayload(
                     parkingId = "parking-exit-time",
                     licensePlate = "ABC1234",
                     eventType = EventType.EXIT.name,
-                    timestampField = "exit_time",
-                    timestampValue = "2025-01-01T12:00:00.000Z",
+                    exitTime = LocalDateTime.of(2025, 1, 1, 12, 0),
                 ),
             )
 
@@ -162,7 +162,7 @@ class WebhookControllerV1IT : EndpointIntegrationTestBase() {
     }
 
     @Test
-    fun `post webhook without timestamp sets occuredAt to null`() {
+    fun `post webhook without timestamp sets occurredAt to null`() {
         val response = postWebhook(buildPayload("parking-no-time", "ABC1234", EventType.ENTRY.name))
 
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -227,6 +227,49 @@ class WebhookControllerV1IT : EndpointIntegrationTestBase() {
             }
             """.trimIndent(),
         ).statusCode(HttpStatus.BAD_REQUEST.value())
+            .contentType("application/problem+json")
+            .body("status", org.hamcrest.Matchers.equalTo(HttpStatus.BAD_REQUEST.value()))
+            .body("title", org.hamcrest.Matchers.equalTo("Bad Request"))
+            .body("code", org.hamcrest.Matchers.equalTo("BAD_REQUEST"))
+            .body("traceId", org.hamcrest.Matchers.not(org.hamcrest.Matchers.blankOrNullString()))
+    }
+
+    @Test
+    fun `not found exception returns 404 problem detail`() {
+        spyWebhookEventCommandPort.failNext(NoSuchElementException("parking session missing"))
+
+        postWebhookWithRestAssured(
+            buildPayload("parking-missing", "ABC1234", EventType.ENTRY.name),
+        ).statusCode(HttpStatus.NOT_FOUND.value())
+            .contentType("application/problem+json")
+            .body("status", org.hamcrest.Matchers.equalTo(HttpStatus.NOT_FOUND.value()))
+            .body("title", org.hamcrest.Matchers.equalTo("Not Found"))
+            .body("detail", org.hamcrest.Matchers.equalTo("Resource not found."))
+            .body("instance", org.hamcrest.Matchers.equalTo("/webhook"))
+            .body("code", org.hamcrest.Matchers.equalTo("NOT_FOUND"))
+            .body("traceId", org.hamcrest.Matchers.not(org.hamcrest.Matchers.blankOrNullString()))
+    }
+
+    @Test
+    fun `unexpected exception returns sanitized 500 problem detail`() {
+        spyWebhookEventCommandPort.failNext(IllegalStateException("database credentials leaked"))
+
+        val response =
+            postWebhookWithRestAssured(
+                buildPayload("parking-error", "ABC1234", EventType.ENTRY.name),
+            ).statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .contentType("application/problem+json")
+                .extract()
+                .response()
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.statusCode)
+        assertEquals("application/problem+json", response.contentType)
+        assertTrue(response.jsonPath().getString("title") == "Internal Server Error")
+        assertTrue(response.jsonPath().getString("detail") == "An unexpected error occurred.")
+        assertTrue(response.jsonPath().getString("instance") == "/webhook")
+        assertTrue(response.jsonPath().getString("code") == "INTERNAL_ERROR")
+        assertTrue(response.jsonPath().getString("traceId").isNotBlank())
+        assertTrue(!response.body.asString().contains("database credentials leaked"))
     }
 
     @Test
@@ -336,25 +379,27 @@ class WebhookControllerV1IT : EndpointIntegrationTestBase() {
         }
 
     private fun buildPayload(
-        parkingId: String,
-        licensePlate: String,
-        eventType: String,
-        timestampField: String? = null,
-        timestampValue: String? = null,
+        parkingId: String = "parking-1",
+        licensePlate: String = "ABC1234",
+        eventType: String = EventType.ENTRY.name,
+        entryTime: LocalDateTime? = null,
+        exitTime: LocalDateTime? = null,
     ): String {
         val timestampJson =
-            if (timestampField != null && timestampValue != null) {
-                ",\"$timestampField\":\"$timestampValue\""
-            } else {
-                ""
+            when {
+                entryTime != null -> """, "entry_time":"$entryTime""""
+                exitTime != null -> """, "exit_time":"$exitTime""""
+                else -> ""
             }
-
         return """
-            |{
-            |    "parking_id":"$parkingId",
-            |    "license_plate":"$licensePlate",
-            |    "event_type":"$eventType"$timestampJson
-            |}
+            {
+                "parking_id":"$parkingId",
+                "license_plate":"$licensePlate",
+                "event_type":"$eventType",
+                "lat": -23.5505,
+                "lng": -46.6333
+                $timestampJson
+            }
             """.trimIndent().replace("|", "")
     }
 
@@ -372,9 +417,15 @@ class WebhookControllerV1IT : EndpointIntegrationTestBase() {
     ) : WebhookEventCommandPort {
         private val received = mutableListOf<WebhookEventCommand>()
         private val overriddenOutcomes = mutableListOf<WebhookEventOutcome>()
+        private val overriddenFailures = mutableListOf<Exception>()
 
         override fun handle(command: WebhookEventCommand): WebhookEventOutcome {
             received.add(command)
+
+            overriddenFailures.firstOrNull()?.also {
+                overriddenFailures.removeAt(0)
+                throw it
+            }
 
             val overridden = overriddenOutcomes.firstOrNull()?.also { overriddenOutcomes.removeAt(0) }
             return overridden ?: delegate.handle(command)
@@ -385,6 +436,11 @@ class WebhookControllerV1IT : EndpointIntegrationTestBase() {
             outcomes.forEach(overriddenOutcomes::add)
         }
 
+        fun failNext(vararg exceptions: Exception) {
+            overriddenFailures.clear()
+            exceptions.forEach(overriddenFailures::add)
+        }
+
         fun lastCommand(): WebhookEventCommand = received.last()
 
         fun receivedCount(): Int = received.size
@@ -392,6 +448,7 @@ class WebhookControllerV1IT : EndpointIntegrationTestBase() {
         fun clear() {
             received.clear()
             overriddenOutcomes.clear()
+            overriddenFailures.clear()
         }
     }
 }

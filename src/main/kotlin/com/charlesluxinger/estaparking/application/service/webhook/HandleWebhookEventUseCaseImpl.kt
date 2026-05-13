@@ -17,7 +17,7 @@ import com.charlesluxinger.estaparking.domain.result.DomainResult
 import java.math.BigDecimal
 import java.time.Duration
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class HandleWebhookEventUseCaseImpl(
     private val parkingSessionRepositoryPort: ParkingSessionRepositoryPort,
@@ -39,8 +39,8 @@ class HandleWebhookEventUseCaseImpl(
                 val vehicle = command.vehicle
                 val transitionResult =
                     when (command.eventType) {
-                        EventType.ENTRY -> entryCommandPort.execute(currentParking, vehicle)
-                        EventType.PARKED -> parkedCommandPort.execute(currentParking, vehicle)
+                        EventType.ENTRY -> entryCommandPort.execute(currentParking, vehicle, command.coordinates)
+                        EventType.PARKED -> parkedCommandPort.execute(currentParking, vehicle, command.coordinates)
                         EventType.EXIT -> currentParking.apply(eventType = EventType.EXIT, vehicle = vehicle)
                     }
 
@@ -54,6 +54,7 @@ class HandleWebhookEventUseCaseImpl(
                                 parkingId = command.parkingId,
                                 vehicle = command.vehicle,
                                 eventType = command.eventType,
+                                coordinates = command.coordinates,
                                 timestamp = timestamp,
                             ),
                         )
