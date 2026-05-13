@@ -1,6 +1,6 @@
 package com.charlesluxinger.estaparking.infra.persistence.spot
 
-import com.charlesluxinger.estaparking.domain.spot.Coordinates
+import com.charlesluxinger.estaparking.domain.common.Coordinates
 import com.charlesluxinger.estaparking.domain.spot.Spot
 import com.charlesluxinger.estaparking.domain.spot.SpotStatus
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
@@ -48,7 +48,7 @@ class SpotEntity(
             SpotEntity(
                 id = domain.id,
                 sector = domain.sector,
-                latitude = domain.coordinates.latitude,
+                latitude = domain.coordinates!!.latitude,
                 longitude = domain.coordinates.longitude,
                 status = domain.status,
                 occupiedByPlate = domain.occupiedBy?.plate,

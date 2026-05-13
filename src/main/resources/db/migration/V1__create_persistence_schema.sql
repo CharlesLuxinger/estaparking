@@ -46,6 +46,8 @@ CREATE TABLE parking_events (
     parking_id VARCHAR(128) NOT NULL,
     license_plate VARCHAR(16) NOT NULL,
     event_type VARCHAR(32) NOT NULL,
+    latitude DECIMAL(10,7) NOT NULL,
+    longitude DECIMAL(10,7) NOT NULL,
     timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     CONSTRAINT uk_parking_events_event_id UNIQUE (event_id)

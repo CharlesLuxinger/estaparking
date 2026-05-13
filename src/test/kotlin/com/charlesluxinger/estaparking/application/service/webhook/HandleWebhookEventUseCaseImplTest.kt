@@ -1,5 +1,6 @@
 package com.charlesluxinger.estaparking.application.service.webhook
 
+import com.charlesluxinger.estaparking.domain.common.Coordinates
 import com.charlesluxinger.estaparking.domain.error.ParkingDomainError
 import com.charlesluxinger.estaparking.domain.event.EventType
 import com.charlesluxinger.estaparking.domain.event.StoredParkingEvent
@@ -14,7 +15,6 @@ import com.charlesluxinger.estaparking.domain.port.outbound.BillingTransactionRe
 import com.charlesluxinger.estaparking.domain.port.outbound.ParkingEventRepositoryPort
 import com.charlesluxinger.estaparking.domain.port.outbound.ParkingSessionRepositoryPort
 import com.charlesluxinger.estaparking.domain.result.DomainResult
-import com.charlesluxinger.estaparking.domain.spot.Coordinates
 import com.charlesluxinger.estaparking.domain.spot.Spot
 import com.charlesluxinger.estaparking.domain.spot.SpotStatus
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
@@ -27,10 +27,12 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
+@Suppress("LargeClass")
 class HandleWebhookEventUseCaseImplTest {
     @Test
     fun `returns not found when parking does not exist`() {
         val parkingId = "missing-parking"
+        val coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63"))
         val parkingSessionRepositoryPort = mockk<ParkingSessionRepositoryPort>()
         val parkingEventRepositoryPort = mockk<ParkingEventRepositoryPort>()
         val entryCommandPort = mockk<EntryCommandPort>()
@@ -54,6 +56,7 @@ class HandleWebhookEventUseCaseImplTest {
                     parkingId = parkingId,
                     vehicle = Vehicle("ABC1234"),
                     eventType = EventType.ENTRY,
+                    coordinates = coordinates,
                 ),
             )
 
@@ -67,6 +70,7 @@ class HandleWebhookEventUseCaseImplTest {
     fun `duplicate ENTRY in same active session is ignored`() {
         val parkingId = "parking-dup-entry"
         val plate = "ABC1234"
+        val coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63"))
         val parkingSessionRepositoryPort = mockk<ParkingSessionRepositoryPort>()
         val parkingEventRepositoryPort = mockk<ParkingEventRepositoryPort>()
         val entryCommandPort = mockk<EntryCommandPort>()
@@ -90,6 +94,7 @@ class HandleWebhookEventUseCaseImplTest {
                     vehicle = Vehicle(plate),
                     eventType = EventType.ENTRY,
                     timestamp = LocalDateTime.of(2025, 1, 1, 12, 0),
+                    coordinates = coordinates,
                 ),
             )
 
@@ -99,6 +104,7 @@ class HandleWebhookEventUseCaseImplTest {
                     parkingId = parkingId,
                     vehicle = Vehicle(plate),
                     eventType = EventType.ENTRY,
+                    coordinates = coordinates,
                 ),
             )
 
@@ -112,10 +118,11 @@ class HandleWebhookEventUseCaseImplTest {
     fun `ENTRY is processed again after EXIT resets guard`() {
         val parkingId = "parking-reset-after-exit"
         val plate = "ABC1234"
+        val coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63"))
         val ports = createMockPorts()
         val useCase = createUseCase(ports)
 
-        setupMocksForReentry(ports, parkingId, plate)
+        setupMocksForReentry(ports, parkingId, plate, coordinates)
 
         val result =
             useCase.handle(
@@ -123,13 +130,14 @@ class HandleWebhookEventUseCaseImplTest {
                     parkingId = parkingId,
                     vehicle = Vehicle(plate),
                     eventType = EventType.ENTRY,
+                    coordinates = coordinates,
                 ),
             )
 
         assertEquals(WebhookEventOutcome.Processed, result)
 
         verify(exactly = 1) { ports.parkingSessionRepositoryPort.save(any()) }
-        verify(exactly = 1) { ports.entryCommandPort.execute(any(), Vehicle(plate)) }
+        verify(exactly = 1) { ports.entryCommandPort.execute(any(), Vehicle(plate), coordinates) }
         verify(exactly = 1) {
             ports.parkingEventRepositoryPort.save(
                 match {
@@ -145,6 +153,7 @@ class HandleWebhookEventUseCaseImplTest {
         ports: MockPorts,
         parkingId: String,
         plate: String,
+        coordinates: Coordinates,
     ) {
         every { ports.parkingSessionRepositoryPort.findById(parkingId) } returns parkingWithAvailableSpot(parkingId)
         every { ports.parkingEventRepositoryPort.findByParkingId(parkingId) } returns
@@ -154,21 +163,24 @@ class HandleWebhookEventUseCaseImplTest {
                     vehicle = Vehicle(plate),
                     eventType = EventType.ENTRY,
                     timestamp = LocalDateTime.of(2025, 1, 1, 12, 0),
+                    coordinates = coordinates,
                 ),
                 StoredParkingEvent(
                     parkingId = parkingId,
                     vehicle = Vehicle(plate),
                     eventType = EventType.PARKED,
                     timestamp = LocalDateTime.of(2025, 1, 1, 13, 0),
+                    coordinates = coordinates,
                 ),
                 StoredParkingEvent(
                     parkingId = parkingId,
                     vehicle = Vehicle(plate),
                     eventType = EventType.EXIT,
                     timestamp = LocalDateTime.of(2025, 1, 1, 14, 0),
+                    coordinates = coordinates,
                 ),
             )
-        every { ports.entryCommandPort.execute(any(), Vehicle(plate)) } answers {
+        every { ports.entryCommandPort.execute(any(), Vehicle(plate), coordinates) } answers {
             firstArg<Parking>().apply(EventType.ENTRY, Vehicle(plate))
         }
         every { ports.parkingSessionRepositoryPort.save(any()) } answers { firstArg() }
@@ -179,6 +191,7 @@ class HandleWebhookEventUseCaseImplTest {
     fun `duplicate webhook command does not mutate session state`() {
         val parkingId = "parking-idempotency-stability"
         val plate = "ABC1234"
+        val coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63"))
         val parkingSessionRepositoryPort = mockk<ParkingSessionRepositoryPort>()
         val parkingEventRepositoryPort = mockk<ParkingEventRepositoryPort>()
         val entryCommandPort = mockk<EntryCommandPort>()
@@ -202,6 +215,7 @@ class HandleWebhookEventUseCaseImplTest {
                     vehicle = Vehicle(plate),
                     eventType = EventType.ENTRY,
                     timestamp = LocalDateTime.of(2025, 1, 1, 12, 0),
+                    coordinates = coordinates,
                 ),
             )
 
@@ -211,6 +225,7 @@ class HandleWebhookEventUseCaseImplTest {
                     parkingId = parkingId,
                     vehicle = Vehicle(plate),
                     eventType = EventType.ENTRY,
+                    coordinates = coordinates,
                 ),
             )
 
@@ -225,6 +240,7 @@ class HandleWebhookEventUseCaseImplTest {
     @Test
     fun `rejected transition returns explicit outcome`() {
         val parkingId = "parking-rejected-transition"
+        val coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63"))
         val parkingSessionRepositoryPort = mockk<ParkingSessionRepositoryPort>()
         val parkingEventRepositoryPort = mockk<ParkingEventRepositoryPort>()
         val entryCommandPort = mockk<EntryCommandPort>()
@@ -242,7 +258,7 @@ class HandleWebhookEventUseCaseImplTest {
 
         every { parkingSessionRepositoryPort.findById(parkingId) } returns parkingWithAvailableSpot(parkingId)
         every { parkingEventRepositoryPort.findByParkingId(parkingId) } returns emptyList()
-        every { parkedCommandPort.execute(any(), Vehicle("ABC1234")) } returns
+        every { parkedCommandPort.execute(any(), Vehicle("ABC1234"), coordinates) } returns
             DomainResult.Error(
                 ParkingDomainError.InvalidParkedOrdering(
                     spotId = 1L,
@@ -256,13 +272,14 @@ class HandleWebhookEventUseCaseImplTest {
                     parkingId = parkingId,
                     vehicle = Vehicle("ABC1234"),
                     eventType = EventType.PARKED,
+                    coordinates = coordinates,
                 ),
             )
 
         assertTrue(result is WebhookEventOutcome.RejectedTransition)
         val rejectedResult = result as WebhookEventOutcome.RejectedTransition
         assertTrue(rejectedResult.error is ParkingDomainError.InvalidParkedOrdering)
-        verify(exactly = 1) { parkedCommandPort.execute(any(), Vehicle("ABC1234")) }
+        verify(exactly = 1) { parkedCommandPort.execute(any(), Vehicle("ABC1234"), coordinates) }
         verify(exactly = 0) { parkingSessionRepositoryPort.save(any()) }
         verify(exactly = 0) { parkingEventRepositoryPort.save(any()) }
     }
@@ -329,6 +346,7 @@ class HandleWebhookEventUseCaseImplTest {
     fun `ENTRY event when parking is full returns rejected transition with full occupancy`() {
         val parkingId = "parking-entry-full"
         val vehicle = Vehicle("JKL1234")
+        val coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63"))
         val ports = createMockPorts()
         val useCase = createUseCase(ports)
         val fullParking =
@@ -349,7 +367,7 @@ class HandleWebhookEventUseCaseImplTest {
 
         every { ports.parkingSessionRepositoryPort.findById(parkingId) } returns fullParking
         every { ports.parkingEventRepositoryPort.findByParkingId(parkingId) } returns emptyList()
-        every { ports.entryCommandPort.execute(fullParking, vehicle) } returns
+        every { ports.entryCommandPort.execute(fullParking, vehicle, coordinates) } returns
             DomainResult.Error(ParkingDomainError.FullOccupancyEntryDenied)
 
         val result =
@@ -359,6 +377,7 @@ class HandleWebhookEventUseCaseImplTest {
                     vehicle = vehicle,
                     eventType = EventType.ENTRY,
                     occurredAt = LocalDateTime.of(2025, 1, 1, 10, 0),
+                    coordinates = coordinates,
                 ),
             )
 
@@ -373,12 +392,13 @@ class HandleWebhookEventUseCaseImplTest {
     fun `PARKED event with invalid ordering returns rejected transition with invalid parked ordering`() {
         val parkingId = "parking-invalid-parked-ordering"
         val ports = createMockPorts()
+        val coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63"))
         val useCase = createUseCase(ports)
         val vehicle = Vehicle("PQR9012")
 
         every { ports.parkingSessionRepositoryPort.findById(parkingId) } returns parkingWithAvailableSpot(parkingId)
         every { ports.parkingEventRepositoryPort.findByParkingId(parkingId) } returns emptyList()
-        every { ports.parkedCommandPort.execute(any(), vehicle) } returns
+        every { ports.parkedCommandPort.execute(any(), vehicle, coordinates) } returns
             DomainResult.Error(
                 ParkingDomainError.InvalidParkedOrdering(
                     spotId = 1L,
@@ -393,6 +413,7 @@ class HandleWebhookEventUseCaseImplTest {
                     vehicle = vehicle,
                     eventType = EventType.PARKED,
                     occurredAt = LocalDateTime.of(2025, 1, 1, 11, 0),
+                    coordinates = coordinates,
                 ),
             )
 
@@ -408,6 +429,7 @@ class HandleWebhookEventUseCaseImplTest {
         val parkingId = "parking-exit-wrong-vehicle"
         val currentVehicle = Vehicle("STU3456")
         val attemptedVehicle = Vehicle("VWX7890")
+        val coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63"))
         val parkingSessionRepositoryPort = mockk<ParkingSessionRepositoryPort>()
         val parkingEventRepositoryPort = mockk<ParkingEventRepositoryPort>()
 
@@ -446,6 +468,7 @@ class HandleWebhookEventUseCaseImplTest {
                     vehicle = attemptedVehicle,
                     eventType = EventType.EXIT,
                     occurredAt = LocalDateTime.of(2025, 1, 1, 12, 0),
+                    coordinates = coordinates,
                 ),
             )
 
@@ -461,6 +484,7 @@ class HandleWebhookEventUseCaseImplTest {
         val parkingId = "parking-entry-success-persistence"
         val plate = "YZA1122"
         val vehicle = Vehicle(plate)
+        val coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63"))
         val ports = createMockPorts()
         val useCase = createUseCase(ports)
         val currentParking = parkingWithAvailableSpot(parkingId)
@@ -482,7 +506,8 @@ class HandleWebhookEventUseCaseImplTest {
 
         every { ports.parkingSessionRepositoryPort.findById(parkingId) } returns currentParking
         every { ports.parkingEventRepositoryPort.findByParkingId(parkingId) } returns emptyList()
-        every { ports.entryCommandPort.execute(currentParking, vehicle) } returns DomainResult.Success(updatedParking)
+        every { ports.entryCommandPort.execute(currentParking, vehicle, coordinates) } returns
+            DomainResult.Success(updatedParking)
         every { ports.parkingSessionRepositoryPort.save(updatedParking) } returns updatedParking
         every { ports.parkingEventRepositoryPort.save(any()) } answers { firstArg() }
 
@@ -493,6 +518,7 @@ class HandleWebhookEventUseCaseImplTest {
                     vehicle = vehicle,
                     eventType = EventType.ENTRY,
                     occurredAt = LocalDateTime.of(2025, 1, 1, 13, 0),
+                    coordinates = coordinates,
                 ),
             )
 
@@ -513,13 +539,14 @@ class HandleWebhookEventUseCaseImplTest {
     fun `when entry fails with full occupancy no persistence calls are made`() {
         val parkingId = "parking-entry-fail-no-persistence"
         val vehicle = Vehicle("BCD3344")
+        val coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63"))
         val ports = createMockPorts()
         val useCase = createUseCase(ports)
         val currentParking = parkingWithAvailableSpot(parkingId)
 
         every { ports.parkingSessionRepositoryPort.findById(parkingId) } returns currentParking
         every { ports.parkingEventRepositoryPort.findByParkingId(parkingId) } returns emptyList()
-        every { ports.entryCommandPort.execute(currentParking, vehicle) } returns
+        every { ports.entryCommandPort.execute(currentParking, vehicle, coordinates) } returns
             DomainResult.Error(ParkingDomainError.FullOccupancyEntryDenied)
 
         val result =
@@ -529,6 +556,7 @@ class HandleWebhookEventUseCaseImplTest {
                     vehicle = vehicle,
                     eventType = EventType.ENTRY,
                     occurredAt = LocalDateTime.of(2025, 1, 1, 14, 0),
+                    coordinates = coordinates,
                 ),
             )
 
@@ -544,6 +572,7 @@ class HandleWebhookEventUseCaseImplTest {
         val parkingId = "parking-exit-with-billing"
         val plate = "XYZ9999"
         val vehicle = Vehicle(plate)
+        val coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63"))
         val entryTime = LocalDateTime.of(2025, 1, 1, 10, 0)
         val exitTime = LocalDateTime.of(2025, 1, 1, 12, 30) // 150 minutes = 2.5 hours
 
@@ -574,7 +603,7 @@ class HandleWebhookEventUseCaseImplTest {
 
         every { parkingSessionRepositoryPort.findById(parkingId) } returns parking
         every { parkingEventRepositoryPort.findByParkingId(parkingId) } returns
-            listOf(StoredParkingEvent(parkingId, vehicle, EventType.ENTRY, entryTime))
+            listOf(StoredParkingEvent(parkingId, vehicle, EventType.ENTRY, entryTime, coordinates))
         every { parkingSessionRepositoryPort.save(any()) } answers { firstArg() }
         every { parkingEventRepositoryPort.save(any()) } answers { firstArg() }
         every { billingRepositoryPort.findGarageBySector("A") } returns garage
@@ -597,6 +626,7 @@ class HandleWebhookEventUseCaseImplTest {
                     vehicle = vehicle,
                     eventType = EventType.EXIT,
                     occurredAt = exitTime,
+                    coordinates = coordinates,
                 ),
             )
 
@@ -609,6 +639,7 @@ class HandleWebhookEventUseCaseImplTest {
         val parkingId = "parking-exit-no-sector"
         val plate = "XYZ9999"
         val vehicle = Vehicle(plate)
+        val coordinates = Coordinates(BigDecimal("-23.5500000"), BigDecimal("-46.6300000"))
         val exitTime = LocalDateTime.of(2025, 1, 1, 12, 30)
 
         val parkingSessionRepositoryPort = mockk<ParkingSessionRepositoryPort>()
@@ -618,30 +649,17 @@ class HandleWebhookEventUseCaseImplTest {
         val billingTransactionRepositoryPort = mockk<BillingTransactionRepositoryPort>()
         val billingRepositoryPort = mockk<BillingRepositoryPort>()
 
-        val parking =
-            Parking(
-                id = parkingId,
-                name = "Test Parking",
-                spots =
-                    listOf(
-                        Spot(
-                            id = 1L,
-                            sector = "A",
-                            coordinates = Coordinates(BigDecimal("-23.5500000"), BigDecimal("-46.6300000")),
-                            status = SpotStatus.PARKED,
-                            occupiedBy = vehicle,
-                        ),
-                    ),
-            )
+        val parking = Parking(parkingId, "Test Parking", listOf(Spot(1L, "A", coordinates, SpotStatus.PARKED, vehicle)))
 
         every { parkingSessionRepositoryPort.findById(parkingId) } returns parking
         every { parkingEventRepositoryPort.findByParkingId(parkingId) } returns
             listOf(
                 StoredParkingEvent(
-                    parkingId = parkingId,
-                    vehicle = vehicle,
-                    eventType = EventType.ENTRY,
-                    timestamp = LocalDateTime.of(2025, 1, 1, 10, 0),
+                    parkingId,
+                    vehicle,
+                    EventType.ENTRY,
+                    LocalDateTime.of(2025, 1, 1, 10, 0),
+                    coordinates,
                 ),
             )
         every { parkingSessionRepositoryPort.save(any()) } answers { firstArg() }
@@ -650,23 +668,15 @@ class HandleWebhookEventUseCaseImplTest {
 
         val useCase =
             HandleWebhookEventUseCaseImpl(
-                parkingSessionRepositoryPort = parkingSessionRepositoryPort,
-                parkingEventRepositoryPort = parkingEventRepositoryPort,
-                entryCommandPort = entryCommandPort,
-                parkedCommandPort = parkedCommandPort,
-                billingTransactionRepositoryPort = billingTransactionRepositoryPort,
-                billingRepositoryPort = billingRepositoryPort,
+                parkingSessionRepositoryPort,
+                parkingEventRepositoryPort,
+                entryCommandPort,
+                parkedCommandPort,
+                billingTransactionRepositoryPort,
+                billingRepositoryPort,
             )
 
-        val result =
-            useCase.handle(
-                WebhookEventCommand(
-                    parkingId = parkingId,
-                    vehicle = vehicle,
-                    eventType = EventType.EXIT,
-                    occurredAt = exitTime,
-                ),
-            )
+        val result = useCase.handle(WebhookEventCommand(parkingId, vehicle, EventType.EXIT, exitTime, coordinates))
 
         assertEquals(WebhookEventOutcome.Processed, result)
         verify(exactly = 0) { billingTransactionRepositoryPort.save(any()) }

@@ -84,6 +84,15 @@ class RevenueControllerV1IT : EndpointIntegrationTestBase() {
             )
 
         assertEquals(400, response.statusCode.value())
+        assertEquals("application/problem+json", response.headers.contentType?.toString())
+
+        val body = objectMapper.readTree(response.body)
+        assertEquals(400, body.path("status").asInt())
+        assertEquals("Bad Request", body.path("title").asText())
+        assertEquals("Malformed request body.", body.path("detail").asText())
+        assertEquals("/revenue", body.path("instance").asText())
+        assertEquals("BAD_REQUEST", body.path("code").asText())
+        assertTrue(body.path("traceId").asText().isNotBlank())
     }
 
     @Test

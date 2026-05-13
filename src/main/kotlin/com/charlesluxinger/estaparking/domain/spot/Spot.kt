@@ -1,21 +1,26 @@
 package com.charlesluxinger.estaparking.domain.spot
 
+import com.charlesluxinger.estaparking.domain.common.Coordinates
 import com.charlesluxinger.estaparking.domain.error.ParkingDomainError
 import com.charlesluxinger.estaparking.domain.error.ParkingDomainError.ExitBeforeEntry
 import com.charlesluxinger.estaparking.domain.error.ParkingDomainError.InvalidExitOrdering
 import com.charlesluxinger.estaparking.domain.error.ParkingDomainError.InvalidParkedOrdering
 import com.charlesluxinger.estaparking.domain.error.ParkingDomainError.WrongVehicleTransitionAttempt
 import com.charlesluxinger.estaparking.domain.event.EventType
+import com.charlesluxinger.estaparking.domain.event.EventType.ENTRY
+import com.charlesluxinger.estaparking.domain.event.EventType.EXIT
+import com.charlesluxinger.estaparking.domain.event.EventType.PARKED
 import com.charlesluxinger.estaparking.domain.result.DomainResult
 import com.charlesluxinger.estaparking.domain.result.DomainResult.Error
 import com.charlesluxinger.estaparking.domain.result.DomainResult.Success
+import com.charlesluxinger.estaparking.domain.spot.SpotStatus.AVAILABLE
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
 
 data class Spot(
     val id: Long,
     val sector: String,
     val coordinates: Coordinates,
-    val status: SpotStatus = SpotStatus.AVAILABLE,
+    val status: SpotStatus = AVAILABLE,
     val occupiedBy: Vehicle? = null,
 ) {
     init {
@@ -23,16 +28,17 @@ data class Spot(
         require(sector.isNotBlank()) { "Spot sector must not be blank" }
     }
 
-    fun canAcceptEntry(): Boolean = status == SpotStatus.AVAILABLE && occupiedBy == null
+    fun canAcceptEntry(): Boolean = status == AVAILABLE && occupiedBy == null
 
     fun transition(
         eventType: EventType,
         vehicle: Vehicle,
+        coordinates: Coordinates? = null,
     ): DomainResult<Spot, ParkingDomainError> =
         when (eventType) {
-            EventType.ENTRY -> registerEntry(vehicle)
-            EventType.PARKED -> markParked(vehicle)
-            EventType.EXIT -> registerExit(vehicle)
+            ENTRY -> registerEntry(vehicle)
+            PARKED -> markParked(vehicle, coordinates)
+            EXIT -> registerExit(vehicle)
         }
 
     private fun registerEntry(vehicle: Vehicle): DomainResult<Spot, ParkingDomainError> {
@@ -48,7 +54,10 @@ data class Spot(
         return Success(copy(status = SpotStatus.ENTRY_REGISTERED, occupiedBy = vehicle))
     }
 
-    private fun markParked(vehicle: Vehicle): DomainResult<Spot, ParkingDomainError> =
+    private fun markParked(
+        vehicle: Vehicle,
+        coordinates: Coordinates?,
+    ): DomainResult<Spot, ParkingDomainError> =
         when {
             status != SpotStatus.ENTRY_REGISTERED -> {
                 Error(
@@ -69,12 +78,15 @@ data class Spot(
                 )
             }
 
-            else -> Success(copy(status = SpotStatus.PARKED, occupiedBy = vehicle))
+            else -> {
+                val newCoordinates = coordinates ?: this.coordinates
+                Success(copy(status = SpotStatus.PARKED, occupiedBy = vehicle, coordinates = newCoordinates))
+            }
         }
 
     private fun registerExit(vehicle: Vehicle): DomainResult<Spot, ParkingDomainError> =
         when {
-            status == SpotStatus.AVAILABLE -> {
+            status == AVAILABLE -> {
                 Error(
                     ExitBeforeEntry(
                         spotId = id,
@@ -102,6 +114,6 @@ data class Spot(
                 )
             }
 
-            else -> Success(copy(status = SpotStatus.AVAILABLE, occupiedBy = null))
+            else -> Success(copy(status = AVAILABLE, occupiedBy = null))
         }
 }

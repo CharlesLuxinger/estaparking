@@ -1,9 +1,9 @@
 package com.charlesluxinger.estaparking.application.service.entry
 
+import com.charlesluxinger.estaparking.domain.common.Coordinates
 import com.charlesluxinger.estaparking.domain.error.ParkingDomainError
 import com.charlesluxinger.estaparking.domain.parking.Parking
 import com.charlesluxinger.estaparking.domain.result.DomainResult
-import com.charlesluxinger.estaparking.domain.spot.Coordinates
 import com.charlesluxinger.estaparking.domain.spot.Spot
 import com.charlesluxinger.estaparking.domain.spot.SpotStatus
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
@@ -17,6 +17,7 @@ class EntryUseCaseImplTest {
 
     @Test
     fun `execute returns full occupancy error when no entry is possible`() {
+        val coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63"))
         val parking =
             Parking(
                 id = "parking-full",
@@ -26,14 +27,14 @@ class EntryUseCaseImplTest {
                         Spot(
                             id = 1L,
                             sector = "A",
-                            coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63")),
+                            coordinates = coordinates,
                             status = SpotStatus.PARKED,
                             occupiedBy = Vehicle("AAA1111"),
                         ),
                     ),
             )
 
-        val result = useCase.execute(parking, Vehicle("BBB2222"))
+        val result = useCase.execute(parking, Vehicle("BBB2222"), coordinates)
 
         assertTrue(result is DomainResult.Error)
         assertEquals(ParkingDomainError.FullOccupancyEntryDenied, (result as DomainResult.Error).error)
@@ -41,6 +42,7 @@ class EntryUseCaseImplTest {
 
     @Test
     fun `execute registers entry when parking has available spot`() {
+        val coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63"))
         val parking =
             Parking(
                 id = "parking-open",
@@ -50,12 +52,12 @@ class EntryUseCaseImplTest {
                         Spot(
                             id = 1L,
                             sector = "A",
-                            coordinates = Coordinates(BigDecimal("-23.55"), BigDecimal("-46.63")),
+                            coordinates = coordinates,
                         ),
                     ),
             )
 
-        val result = useCase.execute(parking, Vehicle("CCC3333"))
+        val result = useCase.execute(parking, Vehicle("CCC3333"), coordinates)
 
         assertTrue(result is DomainResult.Success)
         val updated = (result as DomainResult.Success).value

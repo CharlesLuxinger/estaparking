@@ -6,7 +6,7 @@ import com.charlesluxinger.estaparking.domain.billing.PricingSnapshot
 import com.charlesluxinger.estaparking.domain.event.EventType
 import com.charlesluxinger.estaparking.domain.event.StoredParkingEvent
 import com.charlesluxinger.estaparking.domain.parking.Parking
-import com.charlesluxinger.estaparking.domain.spot.Coordinates
+import com.charlesluxinger.estaparking.domain.common.Coordinates
 import com.charlesluxinger.estaparking.domain.spot.Spot
 import com.charlesluxinger.estaparking.domain.spot.SpotStatus
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
@@ -170,6 +170,7 @@ class PersistenceRepositoryIntegrationTest {
 
         val fixedTimestamp = java.time.LocalDateTime.of(2025, 1, 1, 12, 0)
         val vehicle = Vehicle("ABC1234")
+        val coordinates = Coordinates(BigDecimal("-23.5500000"), BigDecimal("-46.6300000"))
         val savedEvents =
             listOf(
                 StoredParkingEvent(
@@ -177,18 +178,21 @@ class PersistenceRepositoryIntegrationTest {
                     vehicle = vehicle,
                     eventType = EventType.ENTRY,
                     timestamp = fixedTimestamp,
+                    coordinates = coordinates,
                 ),
                 StoredParkingEvent(
                     parkingId = parkingId,
                     vehicle = vehicle,
                     eventType = EventType.PARKED,
                     timestamp = fixedTimestamp.plusHours(1),
+                    coordinates = coordinates,
                 ),
                 StoredParkingEvent(
                     parkingId = parkingId,
                     vehicle = vehicle,
                     eventType = EventType.EXIT,
                     timestamp = fixedTimestamp.plusHours(2),
+                    coordinates = coordinates,
                 ),
             ).map(parkingEventJpaAdapter::save)
 

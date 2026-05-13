@@ -4,7 +4,7 @@ import com.charlesluxinger.estaparking.domain.error.ParkingDomainError
 import com.charlesluxinger.estaparking.domain.event.EventType
 import com.charlesluxinger.estaparking.domain.result.DomainResult.Error
 import com.charlesluxinger.estaparking.domain.result.DomainResult.Success
-import com.charlesluxinger.estaparking.domain.spot.Coordinates
+import com.charlesluxinger.estaparking.domain.common.Coordinates
 import com.charlesluxinger.estaparking.domain.spot.Spot
 import com.charlesluxinger.estaparking.domain.spot.SpotStatus
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle

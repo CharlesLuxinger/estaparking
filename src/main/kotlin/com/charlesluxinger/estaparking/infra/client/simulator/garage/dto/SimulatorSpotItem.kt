@@ -3,7 +3,7 @@ package com.charlesluxinger.estaparking.infra.client.simulator.garage.dto
 import com.charlesluxinger.estaparking.domain.port.outbound.SimulatorGarageClientError
 import com.charlesluxinger.estaparking.domain.result.DomainResult
 import com.charlesluxinger.estaparking.domain.result.DomainResult.Success
-import com.charlesluxinger.estaparking.domain.spot.Coordinates
+import com.charlesluxinger.estaparking.domain.common.Coordinates
 import com.charlesluxinger.estaparking.domain.spot.Spot
 import java.math.BigDecimal
 

@@ -1,5 +1,6 @@
 package com.charlesluxinger.estaparking.domain.spot
 
+import com.charlesluxinger.estaparking.domain.common.Coordinates
 import java.math.BigDecimal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals

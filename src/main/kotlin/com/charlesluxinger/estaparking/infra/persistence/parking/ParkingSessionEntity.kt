@@ -1,7 +1,7 @@
 package com.charlesluxinger.estaparking.infra.persistence.parking
 
+import com.charlesluxinger.estaparking.domain.common.Coordinates
 import com.charlesluxinger.estaparking.domain.parking.Parking
-import com.charlesluxinger.estaparking.domain.spot.Coordinates
 import com.charlesluxinger.estaparking.domain.spot.Spot
 import com.charlesluxinger.estaparking.domain.spot.SpotStatus
 import com.charlesluxinger.estaparking.domain.vehicle.Vehicle
@@ -60,10 +60,10 @@ class ParkingSpotSnapshotEntity(
     val spotId: Long = 0,
     @Column(name = "sector", nullable = false)
     val sector: String = "",
-    @Column(name = "latitude", nullable = false, precision = 10, scale = 7)
-    val latitude: BigDecimal = BigDecimal.ZERO,
-    @Column(name = "longitude", nullable = false, precision = 10, scale = 7)
-    val longitude: BigDecimal = BigDecimal.ZERO,
+    @Column(name = "latitude", precision = 10, scale = 7)
+    val latitude: BigDecimal,
+    @Column(name = "longitude", precision = 10, scale = 7)
+    val longitude: BigDecimal,
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     val status: SpotStatus = SpotStatus.AVAILABLE,
@@ -88,7 +88,7 @@ class ParkingSpotSnapshotEntity(
             ParkingSpotSnapshotEntity(
                 spotId = domain.id,
                 sector = domain.sector,
-                latitude = domain.coordinates.latitude,
+                latitude = domain.coordinates!!.latitude,
                 longitude = domain.coordinates.longitude,
                 status = domain.status,
                 occupiedByPlate = domain.occupiedBy?.plate,
