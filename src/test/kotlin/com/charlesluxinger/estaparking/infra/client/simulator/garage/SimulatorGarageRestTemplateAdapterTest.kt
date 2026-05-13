@@ -205,7 +205,7 @@ class SimulatorGarageRestTemplateAdapterTest {
     fun `fetchGarage handles RestClientResponseException as unexpected status`() {
         val restTemplate = mockk<RestTemplate>()
         val mockException = mockk<org.springframework.web.client.RestClientResponseException>()
-        every { mockException.statusCode } returns org.springframework.http.HttpStatus.NOT_FOUND
+        every { mockException.statusCode } returns HttpStatus.NOT_FOUND
         every { mockException.responseBodyAsString } returns "Not Found"
         every {
             restTemplate.getForEntity("http://simulator.local/garage", String::class.java)

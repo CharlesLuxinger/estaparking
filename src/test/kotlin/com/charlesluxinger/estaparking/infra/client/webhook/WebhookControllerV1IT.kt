@@ -137,7 +137,7 @@ class WebhookControllerV1IT : EndpointIntegrationTestBase() {
                     parkingId = "parking-entry-time",
                     licensePlate = "ABC1234",
                     eventType = EventType.ENTRY.name,
-                    entryTime = LocalDateTime.of(2025, 1, 1, 12, 0)
+                    entryTime = LocalDateTime.of(2025, 1, 1, 12, 0),
                 ),
             )
 

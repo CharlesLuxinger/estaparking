@@ -17,7 +17,7 @@ import com.charlesluxinger.estaparking.domain.result.DomainResult
 import java.math.BigDecimal
 import java.time.Duration
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class HandleWebhookEventUseCaseImpl(
     private val parkingSessionRepositoryPort: ParkingSessionRepositoryPort,
